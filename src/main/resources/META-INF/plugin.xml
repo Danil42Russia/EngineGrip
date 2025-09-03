@@ -1,0 +1,36 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.vk.enginegrip</id>
+    <name>Engine Grip</name>
+    <vendor email="danil42worker@gmail.com" url="https://vk.com/danil42russia">Danil Ovchinnikov</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <resource-bundle>messages.EngineGripBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="EngineToolWindow"
+                    anchor="right"
+                    icon="AllIcons.Toolwindows.ToolWindowDataView"
+                    factoryClass="com.vk.enginegrip.toolwindow.EngineToolWindowFactory"/>
+
+        <!--        <contentTabActionProvider implementation="com.vk.enginegrip.toolwindow.EngineConnectionTabActionProvider"/>-->
+
+
+        <fileEditorProvider implementation="com.vk.enginegrip.editor.EngineEditorProvider"/>
+
+
+        <!--        <fileEditorProvider />-->
+        <!--        <selectInTarget />-->
+
+    </extensions>
+
+    <actions resource-bundle="messages.EngineGripBundle">
+        <group id="Engine.Actions">
+            <!-- Вынести в отдельную группу -->
+            <action id="Engine.OpenConnections"
+                    class="com.vk.enginegrip.actions.EngineOpenConnectionAction"
+                    icon="AllIcons.General.Reset"/>
+        </group>
+    </actions>
+
+</idea-plugin>
