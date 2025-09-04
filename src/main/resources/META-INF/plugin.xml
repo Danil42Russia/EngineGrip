@@ -4,7 +4,13 @@
     <name>Engine Grip</name>
     <vendor email="danil42worker@gmail.com" url="https://vk.com/danil42russia">Danil Ovchinnikov</vendor>
 
-    <depends>com.intellij.modules.platform</depends>
+    <!-- TODO(danil42russia): Нужна консультация у Влада -->
+    <dependencies>
+        <plugin id="com.intellij.modules.platform"/>
+        <module name="intellij.grid.core.impl"/>
+        <module name="intellij.grid.impl"/>
+    </dependencies>
+
     <resource-bundle>messages.EngineGripBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -6,6 +6,7 @@ import com.intellij.openapi.fileEditor.WeighedFileEditorProvider
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
+import com.vk.enginegrip.editor.table.EngineTableFileEditor
 
 class EngineEditorProvider : WeighedFileEditorProvider() {
     companion object {
@@ -23,7 +24,7 @@ class EngineEditorProvider : WeighedFileEditorProvider() {
         project: Project,
         file: VirtualFile
     ): FileEditor {
-        return EngineOpenEditor(project, file)
+        return EngineTableFileEditor(project, file)
     }
 
     override fun getEditorTypeId(): String = "engine-editor"
