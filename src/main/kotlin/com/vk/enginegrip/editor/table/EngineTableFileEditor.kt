@@ -8,7 +8,6 @@ import com.intellij.database.datagrid.GridHelperImpl
 import com.intellij.database.editor.TableFileEditor
 import com.intellij.database.extractors.BaseObjectFormatter
 import com.intellij.database.extractors.FormatterCreator
-import com.intellij.database.run.ui.TableResultPanel
 import com.intellij.database.run.ui.grid.editors.*
 import com.intellij.database.run.ui.grid.renderers.DefaultBooleanRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultNumericRendererFactory
@@ -18,21 +17,42 @@ import com.intellij.database.settings.DataGridAppearanceSettings
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.vk.enginegrip.editor.table_mvp.EngineGridDataHookUp
 
 class EngineTableFileEditor(project: Project, file: VirtualFile) :
     TableFileEditor(project, file) {
-    private val myDataGrid: TableResultPanel
+    private val grid: DataGrid
 
     init {
-        val document = EditorFactory.getInstance().createDocument("")
-        val hookUp = EngineDocumentDataHookUp(project, document)
-        myDataGrid = createDataGrid(hookUp) as TableResultPanel
+        grid = createTable()
     }
 
-    override fun configure(
-        grid: DataGrid,
-        appearance: DataGridAppearance
-    ) {
+    private fun createTable(): DataGrid {
+        if (false) {
+            val document = EditorFactory.getInstance().createDocument("")
+            val hookUp = EngineDocumentDataHookUp(project, document)
+        }
+
+        val hookUp = EngineGridDataHookUp(project)
+
+//        val helper = EngineGridHelper()
+//        setPageSize(hookUp, helper)
+
+//        val grid = TableResultPanel(
+//            project,
+//            hookUp,
+//            GridUtil.getGridPopupActions()
+//        ) { grid, appearance ->
+//            GridHelper.set(grid, helper)
+//        }
+//        hookUp.loader.loadFirstPage(object : GridRequestSource(grid) {})
+//
+
+        val grid = createDataGrid(hookUp)
+        return grid
+    }
+
+    override fun configure(grid: DataGrid, appearance: DataGridAppearance) {
         GridCellEditorHelper.set(grid, GridCellEditorHelperImpl())
         GridHelper.set(grid, GridHelperImpl())
         GridCellEditorFactoryProvider.set(grid, GridCellEditorFactoryImpl.getInstance())
@@ -52,5 +72,5 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) :
         appearance.booleanMode = DataGridAppearanceSettings.getSettings().booleanMode;
     }
 
-    override fun getDataGrid(): DataGrid = myDataGrid
+    override fun getDataGrid(): DataGrid = grid
 }
