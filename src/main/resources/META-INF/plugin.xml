@@ -24,7 +24,6 @@
 
         <fileEditorProvider implementation="com.vk.enginegrip.editor.EngineEditorProvider"/>
 
-
         <!--        <fileEditorProvider />-->
         <!--        <selectInTarget />-->
 

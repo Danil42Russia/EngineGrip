@@ -14,41 +14,24 @@ import com.intellij.database.run.ui.grid.renderers.DefaultNumericRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultTextRendererFactory
 import com.intellij.database.run.ui.grid.renderers.GridCellRendererFactories
 import com.intellij.database.settings.DataGridAppearanceSettings
-import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.vk.enginegrip.editor.table_mvp.EngineGridDataHookUp
+import com.vk.enginegrip.util.EngineGridUtil
 
-class EngineTableFileEditor(project: Project, file: VirtualFile) :
-    TableFileEditor(project, file) {
+class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEditor(project, file) {
     private val grid: DataGrid
-
     init {
         grid = createTable()
     }
 
     private fun createTable(): DataGrid {
-        if (false) {
-            val document = EditorFactory.getInstance().createDocument("")
-            val hookUp = EngineDocumentDataHookUp(project, document)
-        }
+        val messageBus = project.messageBus
 
-        val hookUp = EngineGridDataHookUp(project)
-
-//        val helper = EngineGridHelper()
-//        setPageSize(hookUp, helper)
-
-//        val grid = TableResultPanel(
-//            project,
-//            hookUp,
-//            GridUtil.getGridPopupActions()
-//        ) { grid, appearance ->
-//            GridHelper.set(grid, helper)
-//        }
-//        hookUp.loader.loadFirstPage(object : GridRequestSource(grid) {})
-//
-
+        val hookUp = EngineGridDataHookUp(project, messageBus)
         val grid = createDataGrid(hookUp)
+
+        EngineGridUtil.setupProgressIndicating(grid, messageBus)
+
         return grid
     }
 

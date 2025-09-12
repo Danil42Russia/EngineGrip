@@ -1,0 +1,23 @@
+https://github.com/kotest/kotest-intellij-plugin
+https://github.com/explyt/spring-plugin
+https://github.com/crowdin/android-studio-plugin
+https://github.com/zhouyi-up/Jenkins-Plugin
+https://github.com/houxinlin/cool-request
+https://github.com/MaheshBabu11/http-client-plus
+
+https://plugins.jetbrains.com/plugin/16364-elasticsearch-query--edql
+https://bitbucket.org/dancioca/dbn/src
+
+
+
+
+https://github.com/search?q=%22com.intellij.database.datagrid.DataRequest%22+language%3AKotlin&type=code
+https://github.com/PRQL/prql-jetbrains/blob/70e96dd7a751e45f03c6284e5bb27a5df05f74f8/src/main/kotlin/org/mvnsearch/plugins/prql/lang/run/PrqlRunLineMarkerContributor.kt#L6
+https://github.com/yugasun/auto-dev/blob/87fdc63d7f07d3ba32bf165edeb05e3195ee486b/exts/ext-database/src/243/main/kotlin/cc/unitmesh/database/util/SQLExecutor.kt#L9
+https://github.com/ng-galien/idea-plpgdebugger/blob/67faf1f9d3fe4c90621d20b9170e50d1098b10f4/src/main/kotlin/net/plpgsql/ideadebugger/PlFacade.kt#L20
+https://github.com/mongodb/intellij/blob/4665e4d4cf881cfc85d1d9fcb5701639ca1eb3f6/packages/jetbrains-plugin/src/main/kotlin/com/mongodb/jbplugin/ui/viewModel/ConnectionStateViewModel.kt#L10
+https://github.com/matkoch/resharper-entity-framework-visualizer/blob/b78fcf794d602566d995486446434882c27a552e/src/rider/main/kotlin/com/jetbrains/rider/plugins/entityframeworkvisualizer/EntityFrameworkVisualizerEvaluator.kt#L7
+
+
+
+printResultSet <- кажется эта штука вставляет
