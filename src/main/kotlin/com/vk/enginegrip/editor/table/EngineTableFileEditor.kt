@@ -28,26 +28,7 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) :
     }
 
     private fun createTable(): DataGrid {
-        if (false) {
-            val document = EditorFactory.getInstance().createDocument("")
-            val hookUp = EngineDocumentDataHookUp(project, document)
-        }
-
         val hookUp = EngineGridDataHookUp(project)
-
-//        val helper = EngineGridHelper()
-//        setPageSize(hookUp, helper)
-
-//        val grid = TableResultPanel(
-//            project,
-//            hookUp,
-//            GridUtil.getGridPopupActions()
-//        ) { grid, appearance ->
-//            GridHelper.set(grid, helper)
-//        }
-//        hookUp.loader.loadFirstPage(object : GridRequestSource(grid) {})
-//
-
         val grid = createDataGrid(hookUp)
         return grid
     }
