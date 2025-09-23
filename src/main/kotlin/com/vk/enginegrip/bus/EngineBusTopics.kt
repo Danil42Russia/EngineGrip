@@ -10,6 +10,9 @@ interface EngineBusTopics {
         val PRODUCER_TOPIC: Topic<DataProducer> = create(DataProducer::class.java, BroadcastDirection.TO_PARENT, true)
         val CONSUMER_TOPIC: Topic<DataConsumer> = create(DataConsumer::class.java, BroadcastDirection.TO_PARENT, true)
 
+        val REQUEST_TOPIC = PRODUCER_TOPIC
+        val RESPONSE_TOPIC = CONSUMER_TOPIC
+
         private fun <T> create(
             listenerClass: Class<T>,
             broadcastDirection: BroadcastDirection,

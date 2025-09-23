@@ -23,17 +23,17 @@ class EngineBus(project: Project) {
 
         val connection = messageBus.connect()
 
-        connection.subscribe(
-            EngineBusTopics.CONSUMER_TOPIC, EventDispatcher.createMulticaster(
-                DataConsumer::class.java
-            ) { emptyList() }
-        )
-
-        connection.subscribe(
-            EngineBusTopics.PRODUCER_TOPIC, EventDispatcher.createMulticaster(
-                DataProducer::class.java
-            ) { emptyList() }
-        )
+//        connection.subscribe(
+//            EngineBusTopics.CONSUMER_TOPIC, EventDispatcher.createMulticaster(
+//                DataConsumer::class.java
+//            ) { emptyList() }
+//        )
+//
+//        connection.subscribe(
+//            EngineBusTopics.PRODUCER_TOPIC, EventDispatcher.createMulticaster(
+//                DataProducer::class.java
+//            ) { emptyList() }
+//        )
 
     }
 
@@ -45,5 +45,7 @@ class EngineBus(project: Project) {
     /**
      * Их этого мы читаем
      */
-    public interface Consuming {}
+    public interface Consuming {
+        fun addConsumer(consumer: DataConsumer)
+    }
 }

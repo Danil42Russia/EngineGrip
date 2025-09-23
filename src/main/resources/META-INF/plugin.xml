@@ -25,6 +25,8 @@
         <fileEditorProvider implementation="com.vk.enginegrip.editor.EngineEditorProvider"/>
 
 
+        <postStartupActivity implementation="com.vk.enginegrip.startup.EngineProjectActivity"/>
+
         <!--        <fileEditorProvider />-->
         <!--        <selectInTarget />-->
 

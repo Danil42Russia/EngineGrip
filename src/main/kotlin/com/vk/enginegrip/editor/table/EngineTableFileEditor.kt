@@ -14,22 +14,30 @@ import com.intellij.database.run.ui.grid.renderers.DefaultNumericRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultTextRendererFactory
 import com.intellij.database.run.ui.grid.renderers.GridCellRendererFactories
 import com.intellij.database.settings.DataGridAppearanceSettings
-import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.vk.enginegrip.editor.table_mvp.EngineGridDataHookUp
+import com.vk.enginegrip.editor.table_mvp.bus.ZalupaRequestBroker
 
 class EngineTableFileEditor(project: Project, file: VirtualFile) :
     TableFileEditor(project, file) {
     private val grid: DataGrid
+    private val messageBus: ZalupaRequestBroker
 
     init {
+        messageBus = ZalupaRequestBroker.newInstance(project)
+
         grid = createTable()
     }
 
     private fun createTable(): DataGrid {
-        val hookUp = EngineGridDataHookUp(project)
+        val hookUp = EngineGridDataHookUp(project, messageBus.consumerFor())
         val grid = createDataGrid(hookUp)
+
+
+        // DataGridUtil.setupProgressIndicatingAuditor(grid)
+        // он слушает свою шину и меняет в зависимости от запроса
+
         return grid
     }
 
