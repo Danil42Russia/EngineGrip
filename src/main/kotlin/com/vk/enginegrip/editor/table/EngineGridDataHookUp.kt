@@ -16,6 +16,7 @@ import com.intellij.database.run.ui.grid.editors.GridCellEditorHelper
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus
 import com.vk.enginegrip.bus.EngineBusTopics
+import com.vk.enginegrip.http.EngineJRPClient
 import com.vk.enginegrip.task.BackgroundTask
 import java.awt.EventQueue
 
@@ -93,20 +94,16 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
                     DataConsumer.Column(0, "Column Name", 1, null, null),
                     DataConsumer.Column(0, "Column Value", 1, null, null),
                 )
-                val rows = listOf<Array<Any>>(
-                    arrayOf("1", "2"),
-                    arrayOf("2", "3"),
-                    arrayOf("3", "1"),
-                    arrayOf("string", "value"),
-                    arrayOf("d", "v"),
-                    arrayOf("d", "1"),
-                    arrayOf("j", "{\"str\":1}"),
-                ).mapIndexed { index, row -> DataConsumer.Row.create(index, row) }
 
                 progressListener.sendingRequest()
+                val response = EngineJRPClient.getWildcardDict(100)!!
                 Thread.sleep(2_000) // Эмуляция http
 
                 progressListener.processingRequest()
+                val rows = response.mapIndexed { index, row ->
+                    val value = arrayOf(row.key, row.value)
+                    DataConsumer.Row.create(index, value)
+                }
                 Thread.sleep(1_000) // Эмуляция парсинга
 
                 EventQueue.invokeLater {
