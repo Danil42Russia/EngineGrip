@@ -1,5 +1,6 @@
 package com.vk.enginegrip.editor.table
 
+import com.intellij.database.DatabaseDataKeys
 import com.intellij.database.data.types.BaseConversionGraph
 import com.intellij.database.datagrid.DataGrid
 import com.intellij.database.datagrid.DataGridAppearance
@@ -8,6 +9,7 @@ import com.intellij.database.datagrid.GridHelperImpl
 import com.intellij.database.editor.TableFileEditor
 import com.intellij.database.extractors.BaseObjectFormatter
 import com.intellij.database.extractors.FormatterCreator
+import com.intellij.database.run.actions.enablePagination
 import com.intellij.database.run.ui.grid.editors.*
 import com.intellij.database.run.ui.grid.renderers.DefaultBooleanRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultNumericRendererFactory
@@ -16,10 +18,12 @@ import com.intellij.database.run.ui.grid.renderers.GridCellRendererFactories
 import com.intellij.database.settings.DataGridAppearanceSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.vk.enginegrip.settings.EngineSettings
 import com.vk.enginegrip.util.EngineGridUtil
 
 class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEditor(project, file) {
     private val grid: DataGrid
+
     init {
         grid = createTable()
     }
@@ -53,6 +57,10 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
         )
         appearance.setResultViewShowRowNumbers(true);
         appearance.booleanMode = DataGridAppearanceSettings.getSettings().booleanMode;
+
+        grid.putUserData(DatabaseDataKeys.DATA_GRID_SETTINGS_KEY, EngineSettings.getSettings())
+
+        enablePagination(grid, true, null)
     }
 
     override fun getDataGrid(): DataGrid = grid

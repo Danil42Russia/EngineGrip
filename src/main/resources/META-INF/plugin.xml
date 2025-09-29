@@ -14,6 +14,7 @@
     <resource-bundle>messages.EngineGripBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
+
         <toolWindow id="EngineToolWindow"
                     anchor="right"
                     icon="AllIcons.Toolwindows.ToolWindowDataView"

@@ -1,31 +1,18 @@
 package com.vk.enginegrip.editor.table
 
-import com.intellij.database.datagrid.DataConsumer
-import com.intellij.database.datagrid.DataGridListModel
-import com.intellij.database.datagrid.GridColumn
-import com.intellij.database.datagrid.GridDataHookUpBase
-import com.intellij.database.datagrid.GridLoader
-import com.intellij.database.datagrid.GridModel
-import com.intellij.database.datagrid.GridPagingModel
-import com.intellij.database.datagrid.GridPagingModelImpl
-import com.intellij.database.datagrid.GridRequestSource
-import com.intellij.database.datagrid.GridRow
+import com.intellij.database.datagrid.*
 import com.intellij.database.run.ui.grid.GridMutationModel
 import com.intellij.database.run.ui.grid.GridStorageAndModelUpdater
 import com.intellij.database.run.ui.grid.editors.GridCellEditorHelper
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus
-import com.vk.enginegrip.bus.EngineBusTopics
-import com.vk.enginegrip.http.EngineJRPClient
-import com.vk.enginegrip.task.BackgroundTask
-import java.awt.EventQueue
 
 class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
     GridDataHookUpBase<GridRow, GridColumn>(project) {
     private val myModel: DataGridListModel
     private val myMutationModel: GridMutationModel
     private val myModelUpdater: GridStorageAndModelUpdater
-    private val myPageModel: GridPagingModel<GridRow, GridColumn>
+    private val myPageModel: MultiPageModelImpl<GridRow, GridColumn>
 
     private val myLoader: EngineGridLoader
 
@@ -33,7 +20,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
         myModel = DataGridListModel { v1: Any, v2: Any -> GridCellEditorHelper.areValuesEqual(v1, v2) }
         myMutationModel = GridMutationModel(this)
         myModelUpdater = GridStorageAndModelUpdater(myModel, myMutationModel, null)
-        myPageModel = GridPagingModelImpl.SinglePage<GridRow, GridColumn>(myMutationModel)
+//        myPageModel = GridPagingModelImpl.SinglePage<GridRow, GridColumn>(myMutationModel)
+        myPageModel = MultiPageModelImpl(myModel, null)
+
 
         myLoader = EngineGridLoader()
     }
@@ -47,73 +36,103 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
     override fun getDataModel(): GridModel<GridRow, GridColumn> = myModel
 
     private inner class EngineGridLoader : GridLoader {
+        val columns: List<GridColumn>
+
+//        private var myRowsLoaded = -1
+        private val pageSize = 100
+        private val totalPageCount = 3
+        private var total = (pageSize * totalPageCount).toLong() // 300
+
+        private var currentPage = -1
+
+        init {
+            columns = listOf<GridColumn>(
+                DataConsumer.Column(0, "Column Name", 1, null, null),
+                DataConsumer.Column(0, "Column Value", 1, null, null),
+            )
+        }
+
         override fun reloadCurrentPage(source: GridRequestSource) {
-            load(source, 0)
-        }
-
-        override fun loadNextPage(source: GridRequestSource) {
-            load(source, 0)
-        }
-
-        override fun loadPreviousPage(source: GridRequestSource) {
-            load(source, 0)
-        }
-
-        override fun loadLastPage(source: GridRequestSource) {
-            load(source, 0)
-        }
-
-        override fun loadFirstPage(source: GridRequestSource) {
-//           мы открыли страницу
-            load(source, 0)
-        }
-
-        override fun load(source: GridRequestSource, offset: Int) {
+            println("!!! reloadCurrentPage")
             doLoadData(source)
         }
 
+        override fun loadNextPage(source: GridRequestSource) {
+            println("!!! loadNextPage")
+            currentPage += 1
+            doLoadData(source)
+        }
+
+        override fun loadPreviousPage(source: GridRequestSource) {
+            println("!!! loadPreviousPage")
+            currentPage -= 1
+            doLoadData(source)
+        }
+
+        override fun loadLastPage(source: GridRequestSource) {
+            println("!!! loadLastPage")
+            currentPage = (totalPageCount - 1)
+            doLoadData(source)
+        }
+
+        // мы открыли страницу
+        override fun loadFirstPage(source: GridRequestSource) {
+            currentPage = 0
+
+            println("!!! loadFirstPage")
+            doLoadData(source)
+        }
+
+        override fun load(source: GridRequestSource, offset: Int) {
+            println("!!! load")
+            TODO()
+        }
+
         override fun updateTotalRowCount(source: GridRequestSource) {
-            // TODO
+            println("!!! updateTotalRowCount")
+            TODO()
         }
 
         override fun applyFilterAndSorting(source: GridRequestSource) {
-            // TODO
+            println("!!! applyFilterAndSorting")
+            TODO()
         }
 
         override fun updateIsTotalRowCountUpdateable() {
-            // TODO
+            println("!!! updateIsTotalRowCountUpdateable")
+            TODO()
         }
 
         private fun doLoadData(source: GridRequestSource) {
-            val progressListener = messageBus.syncPublisher(EngineBusTopics.Companion.PROGRESS_TOPIC)
+            println("!!! doLoadData")
 
-            BackgroundTask.runTask(project, "Querying request") {
-                progressListener.taskStarted()
+            myPageModel.setTotalRowCount(total, true)
+            myPageModel.pageSize = pageSize
 
-                val columns = listOf<GridColumn>(
-                    DataConsumer.Column(0, "Column Name", 1, null, null),
-                    DataConsumer.Column(0, "Column Value", 1, null, null),
-                )
 
-                progressListener.sendingRequest()
-                val response = EngineJRPClient.getWildcardDict(100)!!
-                Thread.sleep(2_000) // Эмуляция http
-
-                progressListener.processingRequest()
-                val rows = response.mapIndexed { index, row ->
-                    val value = arrayOf(row.key, row.value)
-                    DataConsumer.Row.create(index, value)
-                }
-                Thread.sleep(1_000) // Эмуляция парсинга
-
-                EventQueue.invokeLater {
-                    myModelUpdater.removeRows(0, myModel.rowCount)
-                    myModelUpdater.setColumns(columns)
-                    myModelUpdater.addRows(rows)
-                }
-
-                progressListener.taskFinished()
+            val rows: List<GridRow> = ((pageSize * currentPage)..((pageSize) * (currentPage+ 1))).map { index ->
+                DataConsumer.Row.create(index, arrayOf("+$index", "-$index"))
             }
+
+//            if (currentPage == 0) {
+                val pageStart = rows[0].rowNum
+                myPageModel.pageStart = pageStart
+//            }
+
+            val pageEnd = rows[rows.size - 1].rowNum
+            myPageModel.pageEnd = pageEnd
+
+            myModelUpdater.removeRows(0, myModel.rowCount)
+            myModelUpdater.setColumns(columns)
+            myModelUpdater.addRows(rows)
+
+//            myRowsLoaded += rows.size
+
+//            myPageModel.pageSize = 100 //
+//            myPageModel.pageStart = offset
+//            myPageModel.pageEnd = 3 // Сколько всего страниц
+//
+            source.requestComplete(true)
         }
     }
 }
