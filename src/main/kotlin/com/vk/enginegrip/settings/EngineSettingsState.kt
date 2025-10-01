@@ -3,12 +3,8 @@ package com.vk.enginegrip.settings
 import com.intellij.database.settings.DataGridSettings.AutoTransposeMode
 import com.intellij.database.settings.DataGridSettings.PagingDisplayMode
 import com.intellij.openapi.components.BaseState
-import com.intellij.openapi.components.SettingsCategory
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.OptionTag
 import java.time.ZoneId
-
 
 class EngineSettingsState : BaseState() {
     @get:OptionTag("enablePagingInInEditorResultsByDefault")
