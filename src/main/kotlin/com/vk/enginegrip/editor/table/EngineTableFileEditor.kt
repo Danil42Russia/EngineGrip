@@ -2,10 +2,7 @@ package com.vk.enginegrip.editor.table
 
 import com.intellij.database.DatabaseDataKeys
 import com.intellij.database.data.types.BaseConversionGraph
-import com.intellij.database.datagrid.DataGrid
-import com.intellij.database.datagrid.DataGridAppearance
-import com.intellij.database.datagrid.GridHelper
-import com.intellij.database.datagrid.GridHelperImpl
+import com.intellij.database.datagrid.*
 import com.intellij.database.editor.TableFileEditor
 import com.intellij.database.extractors.BaseObjectFormatter
 import com.intellij.database.extractors.FormatterCreator
@@ -34,6 +31,7 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
         val hookUp = EngineGridDataHookUp(project, messageBus)
         val grid = createDataGrid(hookUp)
 
+        GridUtil.addGridHeaderComponent(grid)
         EngineGridUtil.setupProgressIndicating(grid, messageBus)
 
         return grid

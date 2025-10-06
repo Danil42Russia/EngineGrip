@@ -50,7 +50,7 @@ class EngineViewPane(private val project: Project) : AbstractProjectViewPane(pro
     }
 
     override fun updateFromRoot(restoreExpandedPaths: Boolean): ActionCallback {
-        TODO("Not yet implemented")
+        TODO("updateFromRoot")
     }
 
     override fun select(
@@ -58,12 +58,12 @@ class EngineViewPane(private val project: Project) : AbstractProjectViewPane(pro
         file: VirtualFile?,
         requestFocus: Boolean
     ) {
-        TODO("Not yet implemented")
+        TODO("select")
     }
 
     override fun getWeight(): Int = 1
 
     override fun createSelectInTarget(): SelectInTarget {
-        TODO("Not yet implemented")
+        TODO("createSelectInTarget")
     }
 }

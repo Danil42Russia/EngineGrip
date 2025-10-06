@@ -16,6 +16,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
     private val myMutationModel: GridMutationModel
     private val myModelUpdater: GridStorageAndModelUpdater
     private val myPageModel: MultiPageModelImpl<GridRow, GridColumn>
+    private val myFilteringModel: EngineFilteringModel
 
     private val myLoader: EngineGridLoader
 
@@ -25,6 +26,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
         myModelUpdater = GridStorageAndModelUpdater(myModel, myMutationModel, null)
         myPageModel = MultiPageModelImpl(myModel, EngineSettings.getSettings())
 
+        myFilteringModel = EngineFilteringModel()
 
         myLoader = EngineGridLoader()
     }
@@ -37,34 +39,36 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
     override fun getDataModel(): GridModel<GridRow, GridColumn> = myModel
 
-    private inner class EngineGridLoader : GridLoader {
-        val columns: List<GridColumn>
+    override fun isFilterApplicable(): Boolean = true
 
-        private var totalRowCount = (100 * 3) // 300
+    override fun getFilteringModel(): GridFilteringModel = myFilteringModel
+
+    override fun getFilterPrefix(): String = "PREFIX"
+
+    private inner class EngineGridLoader : GridLoader {
+        val columns: List<GridColumn> = listOf<GridColumn>(
+            DataConsumer.Column(0, "Column Name", 1, null, null),
+            DataConsumer.Column(1, "Column Value", 1, null, null),
+        )
+
+        private var totalRowCount = (100 * 3 + 50 + 6) // 356
 
         private var myRowsLoaded = -1
 
         override fun updateTotalRowCount(source: GridRequestSource) {
             println("!!! updateTotalRowCount")
-            TODO()
+            TODO("updateTotalRowCount")
         }
 
         override fun applyFilterAndSorting(source: GridRequestSource) {
             println("!!! applyFilterAndSorting")
-            TODO()
+
+            loadFirstPage(source)
         }
 
         override fun updateIsTotalRowCountUpdateable() {
             println("!!! updateIsTotalRowCountUpdateable")
-            TODO()
-        }
-
-
-        init {
-            columns = listOf<GridColumn>(
-                DataConsumer.Column(0, "Column Name", 1, null, null),
-                DataConsumer.Column(1, "Column Value", 1, null, null),
-            )
+            TODO("updateIsTotalRowCountUpdateable")
         }
 
         override fun reloadCurrentPage(source: GridRequestSource) {
@@ -119,7 +123,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             doLoadDataFromDB(source, offset)
         }
 
-        private fun getMockRows(offset: Int, pageSize: Int): List<GridRow> {
+        private fun getMockRows(offset: Int, pageSize: Int, filterPrefixText: String): List<GridRow> {
 
             val range = if (offset >= 0) {
                 val offToPage = min(totalRowCount, offset + pageSize) - 1
@@ -131,8 +135,20 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             }
 
             val rows: List<GridRow> = range.map { index ->
-                val value = (0..10).random()
-                DataConsumer.Row.create(index, arrayOf("+${index + 1}", "-$value"))
+                var value: Int
+                var stepCount = 100
+                while (true) {
+                    val randomValue = (0..100).random()
+                    if (randomValue.toString().startsWith(filterPrefixText) && stepCount != 0) {
+                        stepCount -= 1
+                        continue
+                    }
+
+                    value = randomValue
+                    break
+                }
+
+                DataConsumer.Row.create(index, arrayOf("-${index + 1}", "$value"))
             }
 
             return rows
@@ -141,7 +157,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
         private fun doLoadDataFromDB(source: GridRequestSource, offset: Int) {
             val pageSize = myPageModel.pageSize
-            val rows = getMockRows(offset, pageSize)
+            val filterText = myFilteringModel.filterText
+
+            val rows = getMockRows(offset, pageSize, filterText)
 
             myPageModel.setTotalRowCount(totalRowCount.toLong(), true)
 
