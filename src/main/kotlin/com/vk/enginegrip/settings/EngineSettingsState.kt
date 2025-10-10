@@ -83,7 +83,7 @@ class EngineSettingsState : BaseState() {
     var effectiveZoneId: ZoneId? = null
 
     @get:OptionTag("pageSize")
-    var pageSize: Int = 100
+    var pageSize: Int = 10
 
     @get:OptionTag("limit-page-size")
     var limitPageSize: Boolean = true

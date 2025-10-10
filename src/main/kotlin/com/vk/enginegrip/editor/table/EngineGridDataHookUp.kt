@@ -6,7 +6,12 @@ import com.intellij.database.run.ui.grid.GridStorageAndModelUpdater
 import com.intellij.database.run.ui.grid.editors.GridCellEditorHelper
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus
+import com.vk.enginegrip.bus.EngineBusTopics
+import com.vk.enginegrip.http.EngineJRPClient
+import com.vk.enginegrip.http.WildcardPaginationParams
 import com.vk.enginegrip.settings.EngineSettings
+import com.vk.enginegrip.task.BackgroundTask
+import java.awt.EventQueue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -19,6 +24,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
     private val myFilteringModel: EngineFilteringModel
 
     private val myLoader: EngineGridLoader
+
+//        private val jrpClient = EngineJRPClient("http://localhost:8100", 100);
+    private val jrpClient = EngineJRPClient("https://danilovchinnikov.dev.vk-apps.com", 14600);
 
     init {
         myModel = DataGridListModel { v1: Any, v2: Any -> GridCellEditorHelper.areValuesEqual(v1, v2) }
@@ -47,13 +55,20 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
     private inner class EngineGridLoader : GridLoader {
         val columns: List<GridColumn> = listOf<GridColumn>(
-            DataConsumer.Column(0, "Column Name", 1, null, null),
-            DataConsumer.Column(1, "Column Value", 1, null, null),
+            DataConsumer.Column(0, "Key Name", 1, null, null),
+            DataConsumer.Column(1, "Key Origin", 1, null, null),
+            DataConsumer.Column(2, "Key Value", 1, null, null),
         )
 
-        private var totalRowCount = (100 * 3 + 50 + 6) // 356
-
+        private var totalRowCount = 0
         private var myRowsLoaded = -1
+
+        private var pageStarkKeyLoaded = ""
+        private var pageStarkRowsLoaded = -1
+
+        private var pageEndKeyLoaded = ""
+
+        private val concatKeyName = true
 
         override fun updateTotalRowCount(source: GridRequestSource) {
             println("!!! updateTotalRowCount")
@@ -74,6 +89,8 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
         override fun reloadCurrentPage(source: GridRequestSource) {
             println("!!! reloadCurrentPage")
 
+            pageEndKeyLoaded = pageStarkKeyLoaded
+            myRowsLoaded = pageStarkRowsLoaded
             val offset = max(0, myPageModel.pageStart - 1)
             load(source, offset)
         }
@@ -82,10 +99,15 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
         override fun loadFirstPage(source: GridRequestSource) {
             println("!!! loadFirstPage")
 
+            pageStarkKeyLoaded = ""
+            pageEndKeyLoaded = ""
+            myRowsLoaded = 0
+            pageStarkRowsLoaded = 0
+            totalRowCount = jrpClient.getWildcardCount(myFilteringModel.filterText)?.count ?: 0
             load(source, 0)
         }
 
-        // хотим открыть прошлую страницу
+        // хотим открыть следующую страницу
         override fun loadNextPage(source: GridRequestSource) {
             println("!!! loadNextPage")
 
@@ -93,12 +115,12 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             load(source, offset)
         }
 
-        // хотим открыть следующую страницу
+        // хотим открыть прошлую страницу
         override fun loadPreviousPage(source: GridRequestSource) {
             println("!!! loadPreviousPage")
 
             val offset = max(0, myPageModel.pageStart - myPageModel.pageSize - 1)
-            load(source, offset)
+            // load(source, offset)
         }
 
         // хотим открыть последнюю страницу
@@ -109,7 +131,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
             val offset = -(if (pageSize > 0) pageSize else 100) - 1
 
-            load(source, offset)
+            // load(source, offset)
         }
 
         override fun load(source: GridRequestSource, offset: Int) {
@@ -120,7 +142,8 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             val pageSize = myPageModel.pageSize
             println("resultOffset: $offset, pageSize: $pageSize")
 
-            doLoadDataFromDB(source, offset)
+//            doLoadDataFromDB(source, offset)
+            doLoadData(source, offset)
         }
 
         private fun getMockRows(offset: Int, pageSize: Int, filterPrefixText: String): List<GridRow> {
@@ -176,6 +199,68 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             myRowsLoaded += rows.size
 
             source.requestComplete(true)
+        }
+
+        private fun doLoadData(source: GridRequestSource, offset: Int) {
+            val progressListener = messageBus.syncPublisher(EngineBusTopics.PROGRESS_TOPIC)
+            val pageSize = myPageModel.pageSize
+            val filterText = myFilteringModel.filterText
+
+            BackgroundTask.runTask(project, "Querying request") {
+                progressListener.taskStarted()
+                myPageModel.setTotalRowCount(totalRowCount.toLong(), true)
+
+                progressListener.sendingRequest()
+
+                val limit = WildcardPaginationParams(pageSize, pageEndKeyLoaded)
+                val response = jrpClient.getWildcardDictWithPagination(filterText, limit)
+                if (response == null) {
+                    progressListener.taskFinished()
+                    source.requestComplete(false)
+                    return@runTask
+                }
+
+                progressListener.processingRequest()
+                var index = myRowsLoaded
+                val rows = mutableListOf<GridRow>()
+                response.result.forEach { (key, keyValue) ->
+                    val keyName = if (concatKeyName) "$filterText$key" else key
+
+                    val value = arrayOf(key, keyName, keyValue.value)
+                    val row = DataConsumer.Row.create(index, value)
+                    rows.add(row)
+                    index++
+                }
+
+                // ROTO
+                if (rows.isEmpty()){
+                    myModelUpdater.removeRows(0, myModel.rowCount)
+                    progressListener.taskFinished()
+                    source.requestComplete(true)
+                    return@runTask
+                }
+
+                val pageStart = rows[0]
+                myPageModel.pageStart = pageStart.rowNum
+
+                pageStarkKeyLoaded = pageStart.getValue(0).toString()
+                pageStarkRowsLoaded = pageStart.rowNum
+
+                EventQueue.invokeLater {
+                    myModelUpdater.removeRows(0, myModel.rowCount)
+                    myModelUpdater.setColumns(columns)
+                    myModelUpdater.addRows(rows)
+                }
+
+                val pageEnd = rows[rows.size - 1]
+                myPageModel.pageEnd = pageEnd.rowNum
+
+                pageEndKeyLoaded = pageEnd.getValue(0).toString()
+                myRowsLoaded += rows.size
+
+                progressListener.taskFinished()
+                source.requestComplete(true)
+            }
         }
     }
 }
