@@ -82,6 +82,7 @@ class EngineSettings : PersistentStateComponent<EngineSettingsState>, Modificati
     }
 
     override fun getDisabledAggregators(): List<String?> {
+        return listOf() // TODO: remove
         return state.disabledAggregators!! // NPE ??
     }
 

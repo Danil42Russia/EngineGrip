@@ -25,7 +25,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
     private val myLoader: EngineGridLoader
 
-//        private val jrpClient = EngineJRPClient("http://localhost:8100", 100);
+    //    private val jrpClient = EngineJRPClient("http://localhost:8100", 100);
     private val jrpClient = EngineJRPClient("https://danilovchinnikov.dev.vk-apps.com", 14600);
 
     init {
@@ -60,7 +60,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
             DataConsumer.Column(2, "Key Value", 1, null, null),
         )
 
+        //        private var totalRowCount = 300 + 60 + 5
         private var totalRowCount = 0
+
         private var myRowsLoaded = -1
 
         private var pageStarkKeyLoaded = ""
@@ -171,7 +173,14 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
                     break
                 }
 
-                DataConsumer.Row.create(index, arrayOf("-${index + 1}", "$value"))
+                val keyName = "-${index + 1}"
+                val keyOrigin = value.toString()
+
+//                val kekValue = """{"$keyOrigin": $keyName}"""
+
+                val kekValue = """a:1:{s:${keyOrigin.length}:"$keyOrigin";s:${keyName.length}:"$keyName";}"""
+
+                DataConsumer.Row.create(index, arrayOf(keyName, keyOrigin, kekValue))
             }
 
             return rows
@@ -223,17 +232,19 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
                 progressListener.processingRequest()
                 var index = myRowsLoaded
                 val rows = mutableListOf<GridRow>()
-                response.result.forEach { (key, keyValue) ->
+                response.result.forEach { (key, keyResult) ->
                     val keyName = if (concatKeyName) "$filterText$key" else key
 
-                    val value = arrayOf(key, keyName, keyValue.value)
+                    val keyValue = keyResult.value
+
+                    val value = arrayOf(key, keyName, keyValue)
                     val row = DataConsumer.Row.create(index, value)
                     rows.add(row)
                     index++
                 }
 
-                // ROTO
-                if (rows.isEmpty()){
+                // TODO
+                if (rows.isEmpty()) {
                     myModelUpdater.removeRows(0, myModel.rowCount)
                     progressListener.taskFinished()
                     source.requestComplete(true)

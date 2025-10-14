@@ -9,6 +9,8 @@
         <plugin id="com.intellij.modules.platform"/>
         <module name="intellij.grid.core.impl"/>
         <module name="intellij.grid.impl"/>
+
+        <plugin id="com.intellij.modules.json"/>
     </dependencies>
 
     <resource-bundle>messages.EngineGripBundle</resource-bundle>
@@ -27,6 +29,8 @@
 
         <!--        <fileEditorProvider />-->
         <!--        <selectInTarget />-->
+
+        <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.ZalupaValueEditorTab"/>
 
     </extensions>
 

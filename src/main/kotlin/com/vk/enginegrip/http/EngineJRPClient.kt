@@ -1,10 +1,13 @@
 package com.vk.enginegrip.http
 
 import com.intellij.execution.process.ProcessIOExecutorService
+import io.ktor.util.decodeBase64String
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.*
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.http.HttpClient
@@ -30,10 +33,45 @@ data class WildcardDictWithPaginationParams(
 )
 
 @Serializable
-data class WildcardDictEntry(val value: String, val flags: Int)
+data class WildcardDictEntry(
+    val value: String,
+    val flags: Int
+)
+
+object WildcardDictEntrySerializer :
+    JsonTransformingSerializer<Map<String, WildcardDictEntry>>(
+        MapSerializer(
+            String.serializer(),
+            WildcardDictEntry.serializer()
+        )
+    ) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        val obj = JsonObject((element as JsonObject).mapValues {
+            val v = it.value as JsonObject
+            val vValue = v["value"]
+            if (vValue is JsonObject) {
+                val content = (vValue["base64"] as JsonPrimitive).content.decodeBase64String()
+
+                JsonObject(
+                    mapOf(
+                        "value" to JsonPrimitive(content),
+                        "flags" to v["flags"]!!,
+                    )
+                )
+            } else {
+                v
+            }
+        })
+        return obj
+    }
+
+    override fun transformSerialize(element: JsonElement): JsonElement = element
+}
+
 
 @Serializable
 data class WildcardResult(
+    @Serializable(with = WildcardDictEntrySerializer::class)
     val result: Map<String, WildcardDictEntry> = mapOf(),
 
     @SerialName("has_more_items")
@@ -57,6 +95,55 @@ class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
             .build()
     }
 
+    private fun <Request, Response> abstractRequest(
+        methodName: String,
+        request: Request,
+        requestSerialize: KSerializer<Request>,
+        responseSerialize: KSerializer<Response>,
+    ): Response? {
+        println("request: $request")
+        val httpClient = createHttpClient()
+
+        val jsonParms: String
+        try {
+            jsonParms = Json.encodeToString(requestSerialize, value = request)
+        } catch (e: Exception) {
+            println("error: $e")
+            return null
+        }
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create("$baseUrl/$methodName?actor=$actorId"))
+            .POST(HttpRequest.BodyPublishers.ofString(jsonParms))
+            .timeout(Duration.ofSeconds(10))
+            .build()
+
+        val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        if (httpResponse.statusCode() != HttpURLConnection.HTTP_OK) {
+            println("statusCode: ${httpResponse.statusCode()}")
+            return null
+        }
+
+        var responseBody = httpResponse.body()
+        if (!(responseBody.startsWith("{") && responseBody.endsWith("}"))) {
+            val elementName = responseSerialize.descriptor.getElementName(0)
+            responseBody = """{"$elementName": $responseBody}""".trimIndent()
+        }
+
+
+        val response: Response
+        try {
+            val format = Json { }
+            response = format.decodeFromString(deserializer = responseSerialize, string = responseBody)
+        } catch (e: Exception) {
+            println("error: $e")
+            return null
+        }
+
+        println("response: $response")
+        return response
+    }
+
     fun getWildcardDictWithPagination(prefix: String, limit: WildcardPaginationParams): WildcardResult? {
         val param = WildcardDictWithPaginationParams(
             prefix = prefix,
@@ -70,50 +157,6 @@ class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
             requestSerialize = WildcardDictWithPaginationParams.serializer(),
             responseSerialize = WildcardResult.serializer(),
         )
-    }
-
-    private fun <Request, Response> abstractRequest(
-        methodName: String,
-        request: Request,
-        requestSerialize: KSerializer<Request>,
-        responseSerialize: KSerializer<Response>,
-    ): Response? {
-        println("request: $request")
-        val httpClient = createHttpClient()
-
-        val jsonParms: String
-        try {
-            jsonParms = Json.encodeToString(requestSerialize, value = request)
-        } catch (_: Exception) {
-            return null
-        }
-
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/$methodName?actor=$actorId"))
-            .POST(HttpRequest.BodyPublishers.ofString(jsonParms))
-            .timeout(Duration.ofSeconds(10))
-            .build()
-
-        val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        if (httpResponse.statusCode() != HttpURLConnection.HTTP_OK) {
-            return null
-        }
-
-        var responseBody = httpResponse.body()
-        if (!(responseBody.startsWith("{") && responseBody.endsWith("}"))) {
-            val elementName = responseSerialize.descriptor.getElementName(0)
-            responseBody = """{"$elementName": $responseBody}""".trimIndent()
-        }
-
-        val response: Response
-        try {
-            response = Json.decodeFromString(deserializer = responseSerialize, string = responseBody)
-        } catch (_: Exception) {
-            return null
-        }
-
-        println("response: $response")
-        return response
     }
 
     fun getWildcardCount(prefix: String): WildcardCountResponse? {

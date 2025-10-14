@@ -33,6 +33,7 @@ repositories {
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
     implementation(libs.kotlinxSerializationJson)
+    implementation("io.github.haradakunihiko:php-json-deserializer-kt:1.3.1")
 
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
@@ -123,26 +124,5 @@ tasks {
 
     publishPlugin {
         dependsOn(patchChangelog)
-    }
-}
-
-intellijPlatformTesting {
-    runIde {
-        register("runIdeForUiTests") {
-            task {
-                jvmArgumentProviders += CommandLineArgumentProvider {
-                    listOf(
-                        "-Drobot-server.port=8082",
-                        "-Dide.mac.message.dialogs.as.sheets=false",
-                        "-Djb.privacy.policy.text=<!--999.999-->",
-                        "-Djb.consents.confirmation.enabled=false",
-                    )
-                }
-            }
-
-            plugins {
-                robotServerPlugin()
-            }
-        }
     }
 }
