@@ -4,7 +4,7 @@ import com.intellij.database.datagrid.DataGrid
 import com.intellij.database.run.ui.*
 import com.intellij.openapi.util.Disposer
 
-class ZalupaValueEditorTab : ValueEditorTab {
+class PhpSerializedValueEditorTab : ValueEditorTab {
     override val priority: Int = 50
 
     override fun createTabInfoProvider(
@@ -15,10 +15,10 @@ class ZalupaValueEditorTab : ValueEditorTab {
     }
 
     private class RecordViewInfoProvider(private val grid: DataGrid, openValueEditorTab: () -> Unit) : TabInfoProvider(
-        "TEST ZALUPA",
+        "Php Serialized",
         null
     ) {
-        private var viewer: CellViewer = ZalupaCellViewerFactory.createViewer(grid)
+        private var viewer: CellViewer = PhpSerializedCCellViewerFactory.createViewer(grid)
 
         init {
             updateTabInfo()

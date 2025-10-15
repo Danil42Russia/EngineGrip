@@ -7,10 +7,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.vk.enginegrip.editor.table.EngineTableFileEditor
+import com.vk.enginegrip.enigne.EngineActorConnection
 
 class EngineEditorProvider : WeighedFileEditorProvider() {
     companion object {
         val ENGINE_KEY: Key<String> = Key("ENGINE_KEY")
+        val ENGINE_CONNECTION: Key<EngineActorConnection> = Key("ENGINE_CONNECTION")
     }
 
     override fun accept(

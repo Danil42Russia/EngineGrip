@@ -34,9 +34,8 @@ class EngineViewPane(private val project: Project) : AbstractProjectViewPane(pro
 
     override fun getId(): String = "TODO 2"
 
-    val openConnectionAction = EngineOpenConnectionAction()
-
     override fun createComponent(): JComponent {
+        val openConnectionAction = EngineOpenConnectionAction(myTree)
         myTree.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {
                 if (e?.clickCount == 2 && e.button == BUTTON1) {

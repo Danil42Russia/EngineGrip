@@ -22,7 +22,7 @@ import com.intellij.testFramework.LightVirtualFile
 import io.github.haradakunihiko.php_json_deserializer.PhpToJson
 import javax.swing.JComponent
 
-class ZalupaCellViewer(private val project: Project, private val grid: DataGrid) : CellViewer {
+class PhpSerializedCellViewer(private val project: Project, private val grid: DataGrid) : CellViewer {
     private val editor: EditorEx = createEditor()
 
     private val wrappedComponent = UiDataProvider.wrapComponent(editor.component) { sink ->
@@ -83,9 +83,9 @@ class ZalupaCellViewer(private val project: Project, private val grid: DataGrid)
 
     private fun updateText(value: Any?, rowIdx: ModelIndex<GridRow>, columnIdx: ModelIndex<GridColumn>) {
         val normalizeValue = if (value is String) {
-            convertToPHP(value)
+            convertToJsonView(value)
         } else {
-            ""
+            value
         }
 
         val document = editor.document
@@ -105,9 +105,13 @@ class ZalupaCellViewer(private val project: Project, private val grid: DataGrid)
         }
     }
 
-    private fun convertToPHP(phpSerialized: String): String {
+    private fun convertToJsonView(value: String): String {
+        if (value.startsWith("{") && value.endsWith("}")) {
+            return value
+        }
+
         return try {
-            PhpToJson.convert(phpSerialized, prettyPrint = true)
+            PhpToJson.convert(value, prettyPrint = true)
         } catch (_: Exception) {
             ""
         }

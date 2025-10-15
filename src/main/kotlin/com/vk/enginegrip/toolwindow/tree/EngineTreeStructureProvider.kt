@@ -11,11 +11,8 @@ class EngineTreeStructureProvider(val project: Project) : BaseTreeModel<EngineTr
     private val myRoot: EngineTreeNode
 
     init {
-        val ch = listOf("confdata", "mc", "pmc").map {
-            val tn = EngineTreeNode(project, it)
-//            tn.update()
-
-            tn
+        val ch = EngineActorsList.LISTS.map {
+            EngineTreeNode(project, it.name, connection = it.connection)
         }.toTypedArray()
 
         myRoot = EngineTreeNode(project, "actors", ch)

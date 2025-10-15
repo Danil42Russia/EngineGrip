@@ -7,6 +7,7 @@ import com.intellij.database.run.ui.grid.editors.GridCellEditorHelper
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus
 import com.vk.enginegrip.bus.EngineBusTopics
+import com.vk.enginegrip.enigne.EngineActorConnection
 import com.vk.enginegrip.http.EngineJRPClient
 import com.vk.enginegrip.http.WildcardPaginationParams
 import com.vk.enginegrip.settings.EngineSettings
@@ -15,7 +16,7 @@ import java.awt.EventQueue
 import kotlin.math.max
 import kotlin.math.min
 
-class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
+class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val connection: EngineActorConnection) :
     GridDataHookUpBase<GridRow, GridColumn>(project) {
     private val myModel: DataGridListModel
     private val myMutationModel: GridMutationModel
@@ -25,8 +26,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus) :
 
     private val myLoader: EngineGridLoader
 
-    //    private val jrpClient = EngineJRPClient("http://localhost:8100", 100);
-    private val jrpClient = EngineJRPClient("https://danilovchinnikov.dev.vk-apps.com", 14600);
+    private val jrpClient = EngineJRPClient(connection)
 
     init {
         myModel = DataGridListModel { v1: Any, v2: Any -> GridCellEditorHelper.areValuesEqual(v1, v2) }

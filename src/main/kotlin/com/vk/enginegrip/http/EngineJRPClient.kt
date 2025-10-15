@@ -1,6 +1,7 @@
 package com.vk.enginegrip.http
 
 import com.intellij.execution.process.ProcessIOExecutorService
+import com.vk.enginegrip.enigne.EngineActorConnection
 import io.ktor.util.decodeBase64String
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -85,8 +86,12 @@ data class WildcardCountRequest(val prefix: String)
 data class WildcardCountResponse(val count: Int)
 
 
-class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
+class EngineJRPClient(private val connection: EngineActorConnection) {
+    val httpClient = createHttpClient()
 
+    init {
+        println("JRP host: ${connection.url} | actor: ${connection.actor}")
+    }
 
     private fun createHttpClient(): HttpClient {
         return HttpClient.newBuilder()
@@ -102,8 +107,6 @@ class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
         responseSerialize: KSerializer<Response>,
     ): Response? {
         println("request: $request")
-        val httpClient = createHttpClient()
-
         val jsonParms: String
         try {
             jsonParms = Json.encodeToString(requestSerialize, value = request)
@@ -113,7 +116,7 @@ class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
         }
 
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$baseUrl/$methodName?actor=$actorId"))
+            .uri(URI.create("${connection.url}/$methodName?actor=${connection.actor}"))
             .POST(HttpRequest.BodyPublishers.ofString(jsonParms))
             .timeout(Duration.ofSeconds(10))
             .build()
@@ -133,8 +136,7 @@ class EngineJRPClient(private val baseUrl: String, private val actorId: Int) {
 
         val response: Response
         try {
-            val format = Json { }
-            response = format.decodeFromString(deserializer = responseSerialize, string = responseBody)
+            response = Json.decodeFromString(deserializer = responseSerialize, string = responseBody)
         } catch (e: Exception) {
             println("error: $e")
             return null

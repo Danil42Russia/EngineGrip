@@ -15,6 +15,7 @@ import com.intellij.database.run.ui.grid.renderers.GridCellRendererFactories
 import com.intellij.database.settings.DataGridAppearanceSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.vk.enginegrip.editor.EngineEditorProvider.Companion.ENGINE_CONNECTION
 import com.vk.enginegrip.settings.EngineSettings
 import com.vk.enginegrip.util.EngineGridUtil
 
@@ -26,9 +27,10 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
     }
 
     private fun createTable(): DataGrid {
+        val connection = file.getUserData(ENGINE_CONNECTION)!! // TODO: NPE
         val messageBus = project.messageBus
 
-        val hookUp = EngineGridDataHookUp(project, messageBus)
+        val hookUp = EngineGridDataHookUp(project, messageBus, connection)
         val grid = createDataGrid(hookUp)
 
         GridUtil.addGridHeaderComponent(grid)

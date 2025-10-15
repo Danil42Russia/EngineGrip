@@ -30,16 +30,16 @@
         <!--        <fileEditorProvider />-->
         <!--        <selectInTarget />-->
 
-        <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.ZalupaValueEditorTab"/>
+        <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.PhpSerializedValueEditorTab"/>
 
     </extensions>
 
     <actions resource-bundle="messages.EngineGripBundle">
         <group id="Engine.Actions">
             <!-- Вынести в отдельную группу -->
-            <action id="Engine.OpenConnections"
-                    class="com.vk.enginegrip.actions.EngineOpenConnectionAction"
-                    icon="AllIcons.General.Reset"/>
+<!--            <action id="Engine.OpenConnections"-->
+<!--                    class="com.vk.enginegrip.actions.EngineOpenConnectionAction"-->
+<!--                    icon="AllIcons.General.Reset"/>-->
         </group>
     </actions>
 

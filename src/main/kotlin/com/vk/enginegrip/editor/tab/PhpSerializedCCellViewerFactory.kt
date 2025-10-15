@@ -9,13 +9,12 @@ import com.intellij.database.run.ui.CellViewerFactory
 import com.intellij.database.run.ui.EditorCellViewer
 import com.intellij.database.run.ui.Suitability
 
-object ZalupaCellViewerFactory : CellViewerFactory {
+object PhpSerializedCCellViewerFactory : CellViewerFactory {
     override fun getSuitability(grid: DataGrid, row: ModelIndex<GridRow>, column: ModelIndex<GridColumn>): Suitability {
         return Suitability.MAX
     }
 
     override fun createViewer(grid: DataGrid): CellViewer {
-        return ZalupaCellViewer(grid.project, grid)
-        return EditorCellViewer(grid.project, grid, true)
+        return PhpSerializedCellViewer(grid.project, grid)
     }
 }
