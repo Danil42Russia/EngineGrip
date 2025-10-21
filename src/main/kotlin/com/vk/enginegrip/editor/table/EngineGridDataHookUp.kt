@@ -60,9 +60,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             DataConsumer.Column(2, "Key Value", 1, null, null),
         )
 
-        //        private var totalRowCount = 300 + 60 + 5
-        private var totalRowCount = 0
+        private val isMock = true
 
+        private var totalRowCount = if (isMock) 300 + 60 + 5 else 0
         private var myRowsLoaded = -1
 
         private var pageStarkKeyLoaded = ""
@@ -105,7 +105,10 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             pageEndKeyLoaded = ""
             myRowsLoaded = 0
             pageStarkRowsLoaded = 0
-            totalRowCount = jrpClient.getWildcardCount(myFilteringModel.filterText)?.count ?: 0
+
+            if (!isMock) {
+                totalRowCount = jrpClient.getWildcardCount(myFilteringModel.filterText)?.count ?: 0
+            }
             load(source, 0)
         }
 
@@ -144,8 +147,11 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             val pageSize = myPageModel.pageSize
             println("resultOffset: $offset, pageSize: $pageSize")
 
-//            doLoadDataFromDB(source, offset)
-            doLoadData(source, offset)
+            if (isMock) {
+                doLoadDataFromDB(source, offset)
+            } else {
+                doLoadData(source, offset)
+            }
         }
 
         private fun getMockRows(offset: Int, pageSize: Int, filterPrefixText: String): List<GridRow> {
