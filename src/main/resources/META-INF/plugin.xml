@@ -8,6 +8,7 @@
     <dependencies>
         <plugin id="com.intellij.modules.platform"/>
         <module name="intellij.grid.core.impl"/>
+        <module name="intellij.grid.csv.core.impl"/>
         <module name="intellij.grid.impl"/>
 
         <plugin id="com.intellij.modules.json"/>
@@ -31,6 +32,7 @@
         <!--        <selectInTarget />-->
 
         <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.PhpSerializedValueEditorTab"/>
+<!--        <database.datagrid.extractorsHelper implementation="com.vk.enginegrip.extractors.EngineExtractorsHelper" />-->
 
     </extensions>
 
