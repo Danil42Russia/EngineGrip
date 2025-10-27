@@ -1,16 +1,20 @@
 package com.vk.enginegrip.toolwindow
 
+import com.intellij.ide.projectView.impl.ProjectViewTree
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionToolbar
-import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.wm.ToolWindow
+import com.intellij.ui.tree.AsyncTreeModel
+import com.vk.enginegrip.bus.EngineActorTopics
+import com.vk.enginegrip.enigne.EngineActor
 import com.vk.enginegrip.toolwindow.projectview.EngineViewPane
+import com.vk.enginegrip.toolwindow.tree.EngineTreeStructureProvider
 import java.awt.GridLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -21,11 +25,21 @@ class EngineToolWindowController(private val project: Project) : Disposable {
         fun getInstance(project: Project) = project.service<EngineToolWindowController>()
     }
 
-    val projectPanel = EngineViewPane(project)
+    val treePanel = EngineTreeStructureProvider(project)
+    val asyncTreeModel = AsyncTreeModel(treePanel, this)
+    val projectPanel = EngineViewPane(project, asyncTreeModel)
+
+    init {
+        project.messageBus.connect().subscribe(EngineActorTopics.TOPIC, object : EngineActorTopics {
+            override fun onNewActor(actor: EngineActor) {
+                refreshAll(actor)
+            }
+        })
+    }
+
 
     private fun createToolbarPanel(targetComponent: JComponent): ActionToolbar {
-//        val toolbarGroup = DefaultActionGroup()
-        val toolbarGroup = ActionManager.getInstance().getAction("FindUsagesMenuGroup") as ActionGroup as ActionGroup
+        val toolbarGroup = ActionManager.getInstance().getAction("ActionMenuGroup") as ActionGroup
 
         val toolbar = ActionManager.getInstance()
             .createActionToolbar("EngineToolWindowToolbar", toolbarGroup, true)
@@ -50,11 +64,15 @@ class EngineToolWindowController(private val project: Project) : Disposable {
 
         contentManager.factory.createContent(
             treePanel,
-            "Temp",
+            null,
             true
         ).let {
             contentManager.addContent(it)
         }
+    }
+
+    fun refreshAll(actor: EngineActor) {
+        treePanel.refreshAll(actor)
     }
 
     override fun dispose() {

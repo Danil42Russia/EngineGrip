@@ -11,7 +11,12 @@ import com.vk.enginegrip.toolwindow.tree.EngineTreeNode
 
 class EngineOpenConnectionAction(private val tree: Tree) : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val selectedNode = tree.getSelectedNodes(EngineTreeNode::class.java) { true }.first()
+        val selectedNode = tree.getSelectedNodes(EngineTreeNode::class.java) { true }.firstOrNull()
+        if (selectedNode == null) {
+            return
+        }
+
+        val connection = selectedNode.getConnection() ?: return
 
         val tempFile = LightVirtualFile(selectedNode.name, EngineFileType(), "")
         tempFile.putUserData(
@@ -21,7 +26,7 @@ class EngineOpenConnectionAction(private val tree: Tree) : AnAction() {
 
         tempFile.putUserData(
             EngineEditorProvider.ENGINE_CONNECTION,
-            selectedNode.getConnection()
+            connection
         )
 
         FileEditorManager.getInstance(e.project!!).openFile(tempFile, true)

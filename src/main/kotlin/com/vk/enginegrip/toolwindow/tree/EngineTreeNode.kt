@@ -8,7 +8,7 @@ import com.vk.enginegrip.enigne.EngineActorConnection
 class EngineTreeNode(
     project: Project,
     private val name: String,
-    private val children: Array<EngineTreeNode> = emptyArray(),
+    private val children: MutableList<EngineTreeNode> = mutableListOf(),
     private val connection: EngineActorConnection? = null
 ) : SimpleNode(project) {
     init {
@@ -18,7 +18,11 @@ class EngineTreeNode(
 
     override fun getName() = name
 
-    override fun getChildren(): Array<EngineTreeNode> = children
+    override fun getChildren(): Array<EngineTreeNode> = children.toTypedArray()
+
+    fun addChild(node: EngineTreeNode) {
+        children.add(node)
+    }
 
     fun getConnection(): EngineActorConnection? = connection
 }

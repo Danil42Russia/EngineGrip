@@ -2,20 +2,28 @@ package com.vk.enginegrip.toolwindow.tree
 
 import com.intellij.openapi.project.Project
 import com.intellij.ui.tree.BaseTreeModel
+import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.concurrency.Invoker
 import com.intellij.util.concurrency.InvokerSupplier
-import javax.swing.event.TreeModelListener
+import com.vk.enginegrip.enigne.EngineActor
+import com.vk.enginegrip.enigne.EngineConnectionDataStorage
 
 class EngineTreeStructureProvider(val project: Project) : BaseTreeModel<EngineTreeNode>(), InvokerSupplier {
     private val invoker = Invoker.forBackgroundThreadWithReadAction(this)
-    private val myRoot: EngineTreeNode
+    private var myRoot: EngineTreeNode
 
     init {
-        val ch = EngineActorsList.LISTS.map {
-            EngineTreeNode(project, it.name, connection = it.connection)
-        }.toTypedArray()
+        myRoot = newRoot()
+    }
 
-        myRoot = EngineTreeNode(project, "actors", ch)
+    fun newRoot(): EngineTreeNode {
+        val actors = EngineConnectionDataStorage.getInstance(project).getActors()
+        val ch = actors.map {
+            EngineTreeNode(project, it.name, connection = it.connection)
+        }.toMutableList()
+
+        val root = EngineTreeNode(project, "actors", ch)
+        return root
     }
 
     override fun getRoot(): EngineTreeNode = myRoot
@@ -24,6 +32,13 @@ class EngineTreeStructureProvider(val project: Project) : BaseTreeModel<EngineTr
         val rootNode = parent as? EngineTreeNode ?: return emptyList()
 
         return rootNode.getChildren().toList()
+    }
+
+    fun refreshAll(actor: EngineActor) {
+        val node = EngineTreeNode(project, actor.name, connection = actor.connection)
+
+        myRoot.addChild(node)
+        treeStructureChanged(null, null, null)
     }
 
     override fun getInvoker(): Invoker = invoker

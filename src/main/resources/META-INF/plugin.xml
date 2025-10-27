@@ -44,5 +44,10 @@
 <!--                    icon="AllIcons.General.Reset"/>-->
         </group>
     </actions>
+    <actions>
+        <group id="ActionMenuGroup" popup="true">
+            <action id="Engine.NewActorAction" class="com.vk.enginegrip.actions.EngineNewActorAction" icon="AllIcons.General.Add"/>
+        </group>
+    </actions>
 
 </idea-plugin>
