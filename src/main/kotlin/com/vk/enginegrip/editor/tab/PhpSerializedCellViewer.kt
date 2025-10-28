@@ -106,7 +106,13 @@ class PhpSerializedCellViewer(private val project: Project, private val grid: Da
     }
 
     private fun convertToJsonView(value: String): String {
+        // JSON: {"key": "value"}
         if (value.startsWith("{") && value.endsWith("}")) {
+            return value
+        }
+
+        // JSON: []
+        if (value.startsWith("[") && value.endsWith("]")) {
             return value
         }
 

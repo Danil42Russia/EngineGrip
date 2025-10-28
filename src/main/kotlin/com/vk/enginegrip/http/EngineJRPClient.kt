@@ -88,6 +88,7 @@ data class WildcardCountResponse(val count: Int)
 
 class EngineJRPClient(private val connection: EngineActorConnection) {
     val httpClient = createHttpClient()
+    val baseUrl = connection.url.trimEnd('/')
 
     init {
         println("JRP host: ${connection.url} | actor: ${connection.actor}")
@@ -116,7 +117,7 @@ class EngineJRPClient(private val connection: EngineActorConnection) {
         }
 
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("${connection.url}/$methodName?actor=${connection.actor}"))
+            .uri(URI.create("$baseUrl/$methodName?actor=${connection.actor}"))
             .POST(HttpRequest.BodyPublishers.ofString(jsonParms))
             .timeout(Duration.ofSeconds(10))
             .build()
@@ -128,6 +129,7 @@ class EngineJRPClient(private val connection: EngineActorConnection) {
         }
 
         var responseBody = httpResponse.body()
+        // Попробовать убрать, заеним на сереализатор string()
         if (!(responseBody.startsWith("{") && responseBody.endsWith("}"))) {
             val elementName = responseSerialize.descriptor.getElementName(0)
             responseBody = """{"$elementName": $responseBody}""".trimIndent()

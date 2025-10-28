@@ -7,8 +7,9 @@ import com.intellij.database.extractors.DefaultValuesExtractor
 import com.intellij.database.extractors.ExtractionConfig
 import com.intellij.database.extractors.ObjectFormatter
 import com.intellij.database.util.Out
+import com.intellij.openapi.project.Project
 
-class EngineFixturesExtractor(converter: ObjectFormatter) : DefaultValuesExtractor(converter) {
+class EngineFixturesExtractor(val project: Project, converter: ObjectFormatter) : DefaultValuesExtractor(converter) {
     override fun getFileExtension(): String {
         return "json"
     }
@@ -31,8 +32,9 @@ class EngineFixturesExtractor(converter: ObjectFormatter) : DefaultValuesExtract
         config: ExtractionConfig,
         vararg selectedColumns: Int
     ): DataExtractor.Extraction {
-        return SqlExtractionBase(out, config, allColumns, query, selectedColumns)
+        return SqlExtractionBase(out, config, allColumns, query, selectedColumns, project)
     }
+
 
     private class SqlExtractionBase(
         private val out: Out,
@@ -40,10 +42,13 @@ class EngineFixturesExtractor(converter: ObjectFormatter) : DefaultValuesExtract
         allColumns: List<GridColumn>,
         query: String,
         selectedColumnIndices: IntArray,
+        project: Project
     ) : DefaultExtraction(out, config, allColumns, query, selectedColumnIndices) {
-        override fun appendData(rows: List<GridRow>) {
+        private val converter = EngineFixturesDataConverter(project)
 
-            out.appendText("""{"todo": "new"}""")
+        override fun appendData(rows: List<GridRow>) {
+            val value = converter.convert(rows)
+            out.appendText(value)
         }
     }
 }

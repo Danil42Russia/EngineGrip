@@ -18,6 +18,6 @@ class EngineFixturesExtractorFactory : DataExtractorFactory {
     }
 
     override fun createExtractor(config: ExtractorConfig): DataExtractor {
-        return EngineFixturesExtractor(config.objectFormatter)
+        return EngineFixturesExtractor(config.project!!, config.objectFormatter)
     }
 }
