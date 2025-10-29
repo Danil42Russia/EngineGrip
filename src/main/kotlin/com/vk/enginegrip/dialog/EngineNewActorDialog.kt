@@ -28,7 +28,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
             textField()
                 .bindText(::name)
                 .align(Align.FILL)
-//                .required()
+                .required()
         }
 
         separator()
@@ -43,7 +43,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
             textField()
                 .bindText(::jrpURL)
                 .align(Align.FILL)
-//                .required()
+                .required()
         }
 
         row("Engine:") {

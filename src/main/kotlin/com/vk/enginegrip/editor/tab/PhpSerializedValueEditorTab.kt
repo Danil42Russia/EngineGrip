@@ -18,7 +18,7 @@ class PhpSerializedValueEditorTab : ValueEditorTab {
         "Php Serialized",
         null
     ) {
-        private var viewer: CellViewer = PhpSerializedCCellViewerFactory.createViewer(grid)
+        private var viewer: CellViewer = PhpSerializedCellViewerFactory.createViewer(grid)
 
         init {
             updateTabInfo()

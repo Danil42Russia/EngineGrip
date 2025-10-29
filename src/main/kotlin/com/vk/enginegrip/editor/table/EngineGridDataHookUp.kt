@@ -54,13 +54,15 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
     override fun getFilterPrefix(): String = "PREFIX"
 
     private inner class EngineGridLoader : GridLoader {
+        private val metaColumnIndex = 2
+
         val columns: List<GridColumn> = listOf<GridColumn>(
-            DataConsumer.Column(0, "Key Name", 1, null, null),
-            DataConsumer.Column(1, "Key Origin", 1, null, null),
-            DataConsumer.Column(2, "Key Value", 1, null, null),
+            DataConsumer.Column(0, "Name", 1, null, null),
+            DataConsumer.Column(1, "Value", 1, null, null),
+            DataConsumer.Column(metaColumnIndex, "(meta)", 1, null, null),
         )
 
-        private val isMock = true
+        private val isMock = false
 
         private var totalRowCount = if (isMock) 300 + 60 + 5 else 0
         private var myRowsLoaded = -1
@@ -238,12 +240,16 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                 progressListener.processingRequest()
                 var index = myRowsLoaded
                 val rows = mutableListOf<GridRow>()
-                response.result.forEach { (key, keyResult) ->
-                    val keyName = if (concatKeyName) "$filterText$key" else key
+                response.result.forEach { (metaKeyValue, keyResult) ->
+                    val keyName = if (concatKeyName) "$filterText$metaKeyValue" else metaKeyValue
 
                     val keyValue = keyResult.value
 
-                    val value = arrayOf(key, keyName, keyValue)
+                    val value = arrayOf(
+                        keyName,
+                        keyValue,
+                        metaKeyValue,
+                    )
                     val row = DataConsumer.Row.create(index, value)
                     rows.add(row)
                     index++
@@ -260,7 +266,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                 val pageStart = rows[0]
                 myPageModel.pageStart = pageStart.rowNum
 
-                pageStarkKeyLoaded = pageStart.getValue(0).toString()
+                pageStarkKeyLoaded = pageStart.getValue(metaColumnIndex).toString()
                 pageStarkRowsLoaded = pageStart.rowNum
 
                 EventQueue.invokeLater {
@@ -272,7 +278,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                 val pageEnd = rows[rows.size - 1]
                 myPageModel.pageEnd = pageEnd.rowNum
 
-                pageEndKeyLoaded = pageEnd.getValue(0).toString()
+                pageEndKeyLoaded = pageEnd.getValue(metaColumnIndex).toString()
                 myRowsLoaded += rows.size
 
                 progressListener.taskFinished()

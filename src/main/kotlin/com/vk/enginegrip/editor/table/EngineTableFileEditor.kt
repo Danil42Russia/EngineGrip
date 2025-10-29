@@ -12,12 +12,17 @@ import com.intellij.database.run.ui.grid.renderers.DefaultBooleanRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultNumericRendererFactory
 import com.intellij.database.run.ui.grid.renderers.DefaultTextRendererFactory
 import com.intellij.database.run.ui.grid.renderers.GridCellRendererFactories
+import com.intellij.database.run.ui.table.TableResultView
 import com.intellij.database.settings.DataGridAppearanceSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.vk.enginegrip.editor.EngineEditorProvider.Companion.ENGINE_CONNECTION
 import com.vk.enginegrip.settings.EngineSettings
 import com.vk.enginegrip.util.EngineGridUtil
+import javax.swing.event.ChangeEvent
+import javax.swing.event.ListSelectionEvent
+import javax.swing.event.TableColumnModelEvent
+import javax.swing.event.TableColumnModelListener
 
 class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEditor(project, file) {
     private val grid: DataGrid
@@ -36,6 +41,7 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
         GridUtil.addGridHeaderComponent(grid)
         EngineGridUtil.setupProgressIndicating(grid, messageBus)
 
+        hideColumn(grid)
         return grid
     }
 
@@ -61,6 +67,32 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
         grid.putUserData(DatabaseDataKeys.DATA_GRID_SETTINGS_KEY, EngineSettings.getSettings())
 
         enablePagination(grid, true, null)
+    }
+
+    private fun hideColumn(grid: DataGrid) {
+        val tableResult = grid.resultView as? TableResultView
+        tableResult?.getColumnModel()?.addColumnModelListener(object : TableColumnModelListener {
+            private val metaColumnIndex = 2
+
+            override fun columnAdded(e: TableColumnModelEvent?) {
+                if (e?.toIndex == metaColumnIndex) {
+                    val colum = ModelIndex.forColumn(grid, metaColumnIndex);
+                    grid.setColumnEnabled(colum, false);
+                }
+            }
+
+            override fun columnRemoved(e: TableColumnModelEvent?) {
+            }
+
+            override fun columnMoved(e: TableColumnModelEvent?) {
+            }
+
+            override fun columnMarginChanged(e: ChangeEvent?) {
+            }
+
+            override fun columnSelectionChanged(e: ListSelectionEvent?) {
+            }
+        })
     }
 
     override fun getDataGrid(): DataGrid = grid
