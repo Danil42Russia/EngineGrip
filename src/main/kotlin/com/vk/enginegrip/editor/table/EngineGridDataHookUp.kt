@@ -7,6 +7,7 @@ import com.intellij.database.run.ui.grid.editors.GridCellEditorHelper
 import com.intellij.openapi.project.Project
 import com.intellij.util.messages.MessageBus
 import com.vk.enginegrip.bus.EngineBusTopics
+import com.vk.enginegrip.editor.EngineEditorConstant
 import com.vk.enginegrip.enigne.EngineActorConnection
 import com.vk.enginegrip.http.EngineJRPClient
 import com.vk.enginegrip.http.WildcardPaginationParams
@@ -54,11 +55,11 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
     override fun getFilterPrefix(): String = "PREFIX"
 
     private inner class EngineGridLoader : GridLoader {
-        private val metaColumnIndex = 2
+        private val metaColumnIndex = EngineEditorConstant.COLUMN_ID.META
 
         val columns: List<GridColumn> = listOf<GridColumn>(
-            DataConsumer.Column(0, "Name", 1, null, null),
-            DataConsumer.Column(1, "Value", 1, null, null),
+            DataConsumer.Column(EngineEditorConstant.COLUMN_ID.NAME, "Name", 1, null, null),
+            DataConsumer.Column(EngineEditorConstant.COLUMN_ID.VALUE, "Value", 1, null, null),
             DataConsumer.Column(metaColumnIndex, "(meta)", 1, null, null),
         )
 
@@ -181,7 +182,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                     break
                 }
 
-                val keyName = "-${index + 1}"
+                val keyName = "-${index + 1}n"
                 val keyOrigin = value.toString()
 
 //                val kekValue = """{"$keyOrigin": $keyName}"""
@@ -246,9 +247,9 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                     val keyValue = keyResult.value
 
                     val value = arrayOf(
-                        keyName,
-                        keyValue,
-                        metaKeyValue,
+                        /* 0 = */ keyName,
+                        /* 1 = */ keyValue,
+                        /* 2 = */ metaKeyValue,
                     )
                     val row = DataConsumer.Row.create(index, value)
                     rows.add(row)

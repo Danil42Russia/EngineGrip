@@ -11,6 +11,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.impl.source.codeStyle.CodeFormatterFacade
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.util.DocumentUtil
+import com.vk.enginegrip.editor.EngineEditorConstant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -45,8 +46,8 @@ class EngineFixturesDataConverter(val project: Project) {
 
     fun convert(rows: List<GridRow>): String {
         val data: List<Queries> = rows.map { row ->
-            val name = row.getValue(0) as String // TODO
-            val value = row.getValue(1) as String // TODO
+            val name = row.getValue(EngineEditorConstant.COLUMN_ID.NAME) as String // TODO
+            val value = row.getValue(EngineEditorConstant.COLUMN_ID.VALUE) as String // TODO
 
             Queries(
                 method = "memcache.set",

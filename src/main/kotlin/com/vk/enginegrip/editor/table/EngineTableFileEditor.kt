@@ -16,6 +16,7 @@ import com.intellij.database.run.ui.table.TableResultView
 import com.intellij.database.settings.DataGridAppearanceSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.vk.enginegrip.editor.EngineEditorConstant
 import com.vk.enginegrip.editor.EngineEditorProvider.Companion.ENGINE_CONNECTION
 import com.vk.enginegrip.settings.EngineSettings
 import com.vk.enginegrip.util.EngineGridUtil
@@ -72,7 +73,7 @@ class EngineTableFileEditor(project: Project, file: VirtualFile) : TableFileEdit
     private fun hideColumn(grid: DataGrid) {
         val tableResult = grid.resultView as? TableResultView
         tableResult?.getColumnModel()?.addColumnModelListener(object : TableColumnModelListener {
-            private val metaColumnIndex = 2
+            private val metaColumnIndex = EngineEditorConstant.COLUMN_ID.META
 
             override fun columnAdded(e: TableColumnModelEvent?) {
                 if (e?.toIndex == metaColumnIndex) {
