@@ -15,7 +15,9 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         private set
     var actorID: Int = 0
         private set
-    var jrpURL: String = ""
+    var jrpHost: String = ""
+        private set
+    var jrpPort: Int = 8080
         private set
 
     init {
@@ -39,10 +41,16 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
                 .align(Align.FILL)
         }
 
-        row("JRP URL:") {
+        row("Host:") {
             textField()
-                .bindText(::jrpURL)
+                .bindText(::jrpHost)
                 .align(Align.FILL)
+                .required()
+
+            label("Port")
+
+            intTextField()
+                .bindIntText(::jrpPort)
                 .required()
         }
 
@@ -59,7 +67,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
                 action = {}
             ).gap(RightGap.SMALL)
 
-            comment("unknown JRP version")
+            comment("Unknown JRP version")
                 .gap(RightGap.SMALL)
         }
     }
@@ -70,7 +78,8 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         val inner = EngineActor(
             name = name,
             connection = EngineActorConnection(
-                url = jrpURL,
+                url = normalizeHost(jrpHost),
+                port = jrpPort,
                 actor = actorID,
             ),
         )
@@ -80,6 +89,15 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
 
         project.messageBus.syncPublisher(EngineActorTopics.TOPIC).onNewActor(inner)
         super.doOKAction()
+    }
+
+    private fun normalizeHost(url: String): String {
+        var tmp = url
+        if (!url.startsWith("http://") || !url.startsWith("https://")) {
+            tmp = "https://$tmp"
+        }
+
+        return tmp.removeSuffix("/")
     }
 
     private fun <T : JTextField> Cell<T>.required(): Cell<T> = this

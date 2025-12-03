@@ -88,10 +88,11 @@ data class WildcardCountResponse(val count: Int)
 
 class EngineJRPClient(private val connection: EngineActorConnection) {
     val httpClient = createHttpClient()
-    val baseUrl = connection.url.trimEnd('/')
+    val baseUrl: String
 
     init {
-        println("JRP host: ${connection.url} | actor: ${connection.actor}")
+        baseUrl = connection.url.trimEnd('/') + ":" + connection.port
+        println("JRP host: $baseUrl | actor: ${connection.actor}")
     }
 
     private fun createHttpClient(): HttpClient {

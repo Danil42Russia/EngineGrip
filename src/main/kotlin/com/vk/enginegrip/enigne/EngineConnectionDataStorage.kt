@@ -28,7 +28,14 @@ class EngineConnectionDataStorage : PersistentStateComponent<EngineConnectionSta
 
     fun getActors(): List<EngineActor> {
         return state.connections.map {
-            EngineActor((it.name ?: ""), EngineActorConnection((it.url ?: ""), it.actorID))
+            EngineActor(
+                name = (it.name ?: ""),
+                connection = EngineActorConnection(
+                    url = (it.url ?: ""),
+                    port = it.port,
+                    actor = it.actorID
+                ),
+            )
         }
     }
 
