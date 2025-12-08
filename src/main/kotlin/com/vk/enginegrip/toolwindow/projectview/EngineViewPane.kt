@@ -2,28 +2,30 @@ package com.vk.enginegrip.toolwindow.projectview
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.SelectInTarget
-import com.intellij.ide.dnd.aware.DnDAwareTree
 import com.intellij.ide.projectView.impl.AbstractProjectViewPane
 import com.intellij.ide.projectView.impl.ProjectViewTree
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.DataKey
+import com.intellij.openapi.actionSystem.DataSink
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.ActionCallback
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ScrollPaneFactory
-import com.intellij.ui.tree.AsyncTreeModel
-import com.intellij.ui.treeStructure.Tree
 import com.vk.enginegrip.actions.EngineOpenConnectionAction
-import com.vk.enginegrip.toolwindow.tree.EngineTreeStructureProvider
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.MouseEvent.BUTTON1
 import javax.swing.Icon
 import javax.swing.JComponent
-import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreeModel
 
 // TODO: подумать как избавиться от AbstractProjectViewPane и стоит ли?
 class EngineViewPane(project: Project, val model: TreeModel) : AbstractProjectViewPane(project) {
+
+    companion object {
+        @JvmField
+        val SELECTED_NODES: DataKey<String> = DataKey.create("selectedNodes")
+    }
 
     fun init() {
         myTree = ProjectViewTree(model)
@@ -35,7 +37,34 @@ class EngineViewPane(project: Project, val model: TreeModel) : AbstractProjectVi
 
     override fun getId(): String = "TODO 2"
 
+    override fun uiDataSnapshot(sink: DataSink) {
+        sink[SELECTED_NODES] = "selectedNodes"
+        super.uiDataSnapshot(sink)
+    }
+
+    override fun uiDataSnapshotForSelection(
+        sink: DataSink,
+        selectedUserObjects: Array<out Any?>,
+        singleSelectedPathUserObjects: Array<out Any?>?
+    ) {
+        super.uiDataSnapshotForSelection(sink, selectedUserObjects, singleSelectedPathUserObjects)
+    }
+
     override fun createComponent(): JComponent {
+
+//        https://github.com/JetBrains/intellij-community/blob/c2d8ce5e51a09d6d9208fad3572f430c033a6c7a/platform/xdebugger-impl/src/com/intellij/xdebugger/impl/ui/tree/XDebuggerTree.java#L393
+//        myTree.addTreeSelectionListener { event ->
+//            val node = myTree.getSelectedNodes(EngineTreeNode::class.java, null).firstOrNull()
+//            SELECTED_NODES.
+//        }
+
+//        (object : TreeSelectionListener {
+//            override fun valueChanged(e: TreeSelectionEvent?) {
+//                println("!!! tofo2")
+//            }
+//
+//        })
+
         val openConnectionAction = EngineOpenConnectionAction(myTree)
         myTree.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent?) {

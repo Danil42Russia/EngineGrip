@@ -19,6 +19,8 @@ import java.awt.GridLayout
 import javax.swing.JComponent
 import javax.swing.JPanel
 
+// https://github.com/JetBrains/intellij-plugins/blob/62f089424db5a4a6a6b7bf681c5831ab6ed4fc3d/makefile/src/com/jetbrains/lang/makefile/toolWindow/MakeToolWindowFactory.kt#L88
+
 @Service(Service.Level.PROJECT)
 class EngineToolWindowController(private val project: Project) : Disposable {
     companion object {

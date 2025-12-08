@@ -47,6 +47,7 @@
     <actions>
         <group id="ActionMenuGroup" popup="true">
             <action id="Engine.NewActorAction" class="com.vk.enginegrip.actions.EngineNewActorAction" icon="AllIcons.General.Add"/>
+            <action id="Engine.EditActorAction" class="com.vk.enginegrip.actions.EngineEditActorAction" icon="AllIcons.Actions.Edit"/>
         </group>
     </actions>
 
