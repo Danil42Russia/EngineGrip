@@ -87,7 +87,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         val storage = EngineConnectionDataStorage.getInstance(project)
         storage.addInnerActor(inner)
 
-        project.messageBus.syncPublisher(EngineActorTopics.TOPIC).onNewActor(inner)
+        project.messageBus.syncPublisher(EngineActorTopics.TOPIC).onCreateActor(inner)
         super.doOKAction()
     }
 

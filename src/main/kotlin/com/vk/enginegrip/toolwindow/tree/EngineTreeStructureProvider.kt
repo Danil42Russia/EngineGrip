@@ -2,7 +2,6 @@ package com.vk.enginegrip.toolwindow.tree
 
 import com.intellij.openapi.project.Project
 import com.intellij.ui.tree.BaseTreeModel
-import com.intellij.ui.treeStructure.SimpleNode
 import com.intellij.util.concurrency.Invoker
 import com.intellij.util.concurrency.InvokerSupplier
 import com.vk.enginegrip.enigne.EngineActor
@@ -45,10 +44,17 @@ class EngineTreeStructureProvider(val project: Project) : BaseTreeModel<EngineTr
         return rootNode.getChildren().toList()
     }
 
-    fun refreshAll(actor: EngineActor) {
+    fun createNode(actor: EngineActor) {
         val node = EngineTreeNode(project, actor.name, connection = actor.connection)
+        myRoot.addChildNode(node)
+    }
 
-        myRoot.addChild(node)
+    fun deleteNode(actor: EngineActor) {
+        val node = EngineTreeNode(project, actor.name, connection = actor.connection)
+        myRoot.removeChildNode(node)
+    }
+
+    fun refreshAll() {
         treeStructureChanged(null, null, null)
     }
 

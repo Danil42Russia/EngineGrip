@@ -49,6 +49,21 @@ class EngineConnectionDataStorage : PersistentStateComponent<EngineConnectionSta
         state.connections.add(inner)
     }
 
+    fun removeInnerActor(actor: EngineActor) {
+        val inner = EngineTestActorConnection().also {
+            it.name = actor.name
+            it.actorID = actor.connection.actor
+            it.url = actor.connection.url
+        }
+
+        if (state.connections.contains(inner)) {
+            state.connections.remove(inner)
+        } else {
+            // TODO: logger
+            println("!!! ошибка в логике удаления элемента из стейта: $actor")
+        }
+    }
+
     companion object {
         fun getInstance(project: Project): EngineConnectionDataStorage = project.service()
     }

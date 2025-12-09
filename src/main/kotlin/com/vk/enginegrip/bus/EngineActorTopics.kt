@@ -8,5 +8,7 @@ interface EngineActorTopics {
         val TOPIC = Topic.create("EngineActorTopics", EngineActorTopics::class.java)
     }
 
-    fun onNewActor(actor: EngineActor) {}
+    fun onCreateActor(actor: EngineActor) {}
+
+    fun onDeleteActor(actor: EngineActor) {}
 }

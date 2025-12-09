@@ -12,6 +12,7 @@ import com.intellij.ui.TreeUIHelper
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.tree.TreeUtil
+import com.vk.enginegrip.actions.EngineDeleteActorAction
 import com.vk.enginegrip.actions.EngineEditActorAction
 import com.vk.enginegrip.actions.EngineNewActorAction
 import com.vk.enginegrip.actions.EngineOpenConnectionAction
@@ -36,23 +37,27 @@ class EngineToolWindowController(private val project: Project) : Disposable {
 
     init {
         project.messageBus.connect().subscribe(EngineActorTopics.TOPIC, object : EngineActorTopics {
-            override fun onNewActor(actor: EngineActor) {
-                refreshAll(actor)
+            override fun onCreateActor(actor: EngineActor) {
+                createNode(actor)
+            }
+
+            override fun onDeleteActor(actor: EngineActor) {
+                deleteNode(actor)
             }
         })
     }
 
-
-    private fun createToolbarPanel(targetComponent: Tree): ActionToolbar {
+    private fun createToolbarPanel(tree: Tree): ActionToolbar {
         val group = DefaultActionGroup()
 
         group.add(EngineNewActorAction())
         group.add(EngineEditActorAction())
+        group.add(EngineDeleteActorAction(tree))
 
         val toolbar = ActionManager.getInstance()
             .createActionToolbar("EngineToolWindowToolbar", group, true)
 
-        toolbar.targetComponent = targetComponent
+        toolbar.targetComponent = tree
         return toolbar
     }
 
@@ -105,8 +110,14 @@ class EngineToolWindowController(private val project: Project) : Disposable {
         }
     }
 
-    fun refreshAll(actor: EngineActor) {
-        treePanel.refreshAll(actor)
+    fun createNode(actor: EngineActor) {
+        treePanel.createNode(actor)
+        treePanel.refreshAll()
+    }
+
+    fun deleteNode(actor: EngineActor) {
+        treePanel.deleteNode(actor)
+        treePanel.refreshAll()
     }
 
     override fun dispose() {

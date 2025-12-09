@@ -20,8 +20,19 @@ class EngineTreeNode(
 
     override fun getChildren(): Array<EngineTreeNode> = children.toTypedArray()
 
-    fun addChild(node: EngineTreeNode) {
+    fun addChildNode(node: EngineTreeNode) {
         children.add(node)
+    }
+
+    fun removeChildNode(node: EngineTreeNode) {
+        // TODO: после разделение такой хак больше будет не нужен
+        val findNode = children.firstOrNull { it.name == node.name && it.connection == node.connection }
+
+        if (children.contains(findNode)) {
+            children.remove(findNode)
+        } else {
+            println("!!! ошибка в логике удаления элемента из дерева: $findNode")
+        }
     }
 
     fun getConnection(): EngineActorConnection? = connection
