@@ -11,9 +11,11 @@ import com.vk.enginegrip.editor.EngineEditorConstant
 import com.vk.enginegrip.enigne.EngineActorConnection
 import com.vk.enginegrip.http.EngineJRPClient
 import com.vk.enginegrip.http.WildcardPaginationParams
+import com.vk.enginegrip.notifications.EngineErrorNotification
 import com.vk.enginegrip.settings.EngineSettings
 import com.vk.enginegrip.task.BackgroundTask
 import java.awt.EventQueue
+import java.net.ConnectException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -63,6 +65,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             DataConsumer.Column(metaColumnIndex, "(meta)", 1, null, null),
         )
 
+        // TODO: убрать
         private val isMock = false
 
         private var totalRowCount = if (isMock) 300 + 60 + 5 else 0
@@ -74,6 +77,21 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
         private var pageEndKeyLoaded = ""
 
         private val concatKeyName = true
+
+        // Во время выполнения / обработки запроса может прилететь исключение. Часть из них, нормальное поведение,
+        // такие кейсы мы обработаем и покажем пользователю красивую ошибку. А что не ожидали получить, кинем исключение
+        // Да это сломает работу и логику программы, но это лучше, чем ничего
+        private fun <T> safeRequest(request: () -> T): T? {
+            return try {
+                request()
+            } catch (ex: ConnectException) {
+                val message = ex.message ?: "Ошибка во время выполнения запроса: ${ex.toString()}"
+                EngineErrorNotification(message).show(project)
+                null
+            } catch (ex: Exception) {
+                throw ex
+            }
+        }
 
         override fun updateTotalRowCount(source: GridRequestSource) {
             println("!!! updateTotalRowCount")
@@ -110,9 +128,16 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             pageStarkRowsLoaded = 0
 
             if (!isMock) {
-                totalRowCount = jrpClient.getWildcardCount(myFilteringModel.filterText)?.count ?: 0
+                load(source, 0)
+            } else {
+                // Если мы не смогли получить количество элементов, то нет смысла делать запрос на получения элементов
+                safeRequest {
+                    jrpClient.getWildcardCount(myFilteringModel.filterText)?.count
+                }?.let {
+                    totalRowCount = it
+                    load(source, 0)
+                }
             }
-            load(source, 0)
         }
 
         // хотим открыть следующую страницу
@@ -231,7 +256,8 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                 progressListener.sendingRequest()
 
                 val limit = WildcardPaginationParams(pageSize, pageEndKeyLoaded)
-                val response = jrpClient.getWildcardDictWithPagination(filterText, limit)
+
+                val response = safeRequest { jrpClient.getWildcardDictWithPagination(filterText, limit) }
                 if (response == null) {
                     progressListener.taskFinished()
                     source.requestComplete(false)

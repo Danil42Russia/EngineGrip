@@ -87,17 +87,16 @@ data class WildcardCountResponse(val count: Int)
 
 
 class EngineJRPClient(private val connection: EngineActorConnection) {
-    val httpClient = createHttpClient()
-    val baseUrl: String
+    val defaultTimeout: Duration = Duration.ofSeconds(10)
+    val baseUrl: String = connection.url + ":" + connection.port
 
     init {
-        baseUrl = connection.url.trimEnd('/') + ":" + connection.port
         println("JRP host: $baseUrl | actor: ${connection.actor}")
     }
 
     private fun createHttpClient(): HttpClient {
         return HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
+            .connectTimeout(defaultTimeout)
             .executor(ProcessIOExecutorService.INSTANCE)
             .build()
     }
@@ -114,35 +113,35 @@ class EngineJRPClient(private val connection: EngineActorConnection) {
             jsonParms = Json.encodeToString(requestSerialize, value = request)
         } catch (e: Exception) {
             println("error: $e")
-            return null
+            throw e // TODO: убрать за логи
         }
 
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$baseUrl/$methodName?actor=${connection.actor}"))
             .POST(HttpRequest.BodyPublishers.ofString(jsonParms))
-            .timeout(Duration.ofSeconds(10))
+            .timeout(defaultTimeout)
             .build()
 
+        val httpClient = createHttpClient()
         val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
         if (httpResponse.statusCode() != HttpURLConnection.HTTP_OK) {
             println("statusCode: ${httpResponse.statusCode()}")
-            return null
+            throw Error("брат, что-то пошло не так") // TODO
         }
 
         var responseBody = httpResponse.body()
-        // Попробовать убрать, заеним на сереализатор string()
+        // Попробовать убрать, заменив на сереализатор string()
         if (!(responseBody.startsWith("{") && responseBody.endsWith("}"))) {
             val elementName = responseSerialize.descriptor.getElementName(0)
             responseBody = """{"$elementName": $responseBody}""".trimIndent()
         }
-
 
         val response: Response
         try {
             response = Json.decodeFromString(deserializer = responseSerialize, string = responseBody)
         } catch (e: Exception) {
             println("error: $e")
-            return null
+            throw e // TODO: убрать за логи
         }
 
         println("response: $response")
