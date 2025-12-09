@@ -18,9 +18,20 @@ class EngineTreeStructureProvider(val project: Project) : BaseTreeModel<EngineTr
 
     fun newRoot(): EngineTreeNode {
         val actors = EngineConnectionDataStorage.getInstance(project).getActors()
-        val ch = actors.map {
-            EngineTreeNode(project, it.name, connection = it.connection)
-        }.toMutableList()
+
+        val ch = if (true) {
+            actors.map {
+                EngineTreeNode(project, it.name, connection = it.connection)
+            }.toMutableList()
+        } else {
+            val ch1 = mutableListOf<EngineTreeNode>()
+            for (i in 1..50) {
+                val c = EngineTreeNode(project, i.toString())
+                ch1.add(c)
+            }
+
+            ch1
+        }
 
         val root = EngineTreeNode(project, "actors", ch)
         return root

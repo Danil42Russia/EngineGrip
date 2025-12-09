@@ -1,25 +1,29 @@
 package com.vk.enginegrip.toolwindow
 
-import com.intellij.ide.projectView.impl.ProjectViewTree
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.actionSystem.ActionGroup
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.ActionToolbar
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.wm.ToolWindow
+import com.intellij.ui.ScrollPaneFactory
+import com.intellij.ui.TreeUIHelper
 import com.intellij.ui.tree.AsyncTreeModel
+import com.intellij.ui.treeStructure.Tree
+import com.intellij.util.ui.tree.TreeUtil
+import com.vk.enginegrip.actions.EngineEditActorAction
+import com.vk.enginegrip.actions.EngineNewActorAction
+import com.vk.enginegrip.actions.EngineOpenConnectionAction
 import com.vk.enginegrip.bus.EngineActorTopics
 import com.vk.enginegrip.enigne.EngineActor
-import com.vk.enginegrip.toolwindow.projectview.EngineViewPane
 import com.vk.enginegrip.toolwindow.tree.EngineTreeStructureProvider
 import java.awt.GridLayout
-import javax.swing.JComponent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import java.awt.event.MouseEvent.BUTTON1
 import javax.swing.JPanel
-
-// https://github.com/JetBrains/intellij-plugins/blob/62f089424db5a4a6a6b7bf681c5831ab6ed4fc3d/makefile/src/com/jetbrains/lang/makefile/toolWindow/MakeToolWindowFactory.kt#L88
+import javax.swing.tree.TreeSelectionModel
 
 @Service(Service.Level.PROJECT)
 class EngineToolWindowController(private val project: Project) : Disposable {
@@ -29,7 +33,6 @@ class EngineToolWindowController(private val project: Project) : Disposable {
 
     val treePanel = EngineTreeStructureProvider(project)
     val asyncTreeModel = AsyncTreeModel(treePanel, this)
-    val projectPanel = EngineViewPane(project, asyncTreeModel)
 
     init {
         project.messageBus.connect().subscribe(EngineActorTopics.TOPIC, object : EngineActorTopics {
@@ -40,32 +43,61 @@ class EngineToolWindowController(private val project: Project) : Disposable {
     }
 
 
-    private fun createToolbarPanel(targetComponent: JComponent): ActionToolbar {
-        val toolbarGroup = ActionManager.getInstance().getAction("ActionMenuGroup") as ActionGroup
+    private fun createToolbarPanel(targetComponent: Tree): ActionToolbar {
+        val group = DefaultActionGroup()
+
+        group.add(EngineNewActorAction())
+        group.add(EngineEditActorAction())
 
         val toolbar = ActionManager.getInstance()
-            .createActionToolbar("EngineToolWindowToolbar", toolbarGroup, true)
+            .createActionToolbar("EngineToolWindowToolbar", group, true)
+
         toolbar.targetComponent = targetComponent
         return toolbar
     }
 
     fun setUp(toolWindow: ToolWindow) {
-        projectPanel.init()
         val contentManager = toolWindow.contentManager
-        val projectPanelComponent = projectPanel.createComponent()
+        val panel = SimpleToolWindowPanel(true)
 
-        val treePanel = SimpleToolWindowPanel(true).apply {
-            setContent(projectPanelComponent)
+        val tree = object : Tree(asyncTreeModel), UiDataProvider {
+            override fun uiDataSnapshot(sink: DataSink) {
+                // TODO: что-то сюда добавить
+            }
+        }.apply {
+            selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
+            isRootVisible = false
+            showsRootHandles = true
         }
 
+        TreeUtil.installActions(tree)
+        TreeUIHelper.getInstance().installTreeSpeedSearch(tree)
+
+        panel.add(ScrollPaneFactory.createScrollPane(tree))
+
+        val openConnectionAction = EngineOpenConnectionAction(tree)
+        tree.addMouseListener(object : MouseAdapter() {
+            override fun mousePressed(e: MouseEvent?) {
+                if (e?.clickCount == 2 && e.button == BUTTON1) {
+                    ActionManager.getInstance().tryToExecute(
+                        openConnectionAction,
+                        e,
+                        tree,
+                        "",
+                        true
+                    )
+                }
+            }
+        })
+
         val toolBarPanel = JPanel(GridLayout())
-        val toolbar = createToolbarPanel(projectPanelComponent)
+        val toolbar = createToolbarPanel(tree)
         toolBarPanel.add(toolbar.component)
 
-        treePanel.toolbar = toolBarPanel
+        panel.toolbar = toolBarPanel
 
         contentManager.factory.createContent(
-            treePanel,
+            panel,
             null,
             true
         ).let {

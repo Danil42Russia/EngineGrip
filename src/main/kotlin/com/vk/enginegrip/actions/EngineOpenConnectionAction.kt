@@ -7,14 +7,11 @@ import com.intellij.testFramework.LightVirtualFile
 import com.intellij.ui.treeStructure.Tree
 import com.vk.enginegrip.editor.EngineEditorProvider
 import com.vk.enginegrip.toolwindow.file.EngineFileType
-import com.vk.enginegrip.toolwindow.tree.EngineTreeNode
+import com.vk.enginegrip.util.EngineTreeUtil.getSelectedNode
 
 class EngineOpenConnectionAction(private val tree: Tree) : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val selectedNode = tree.getSelectedNodes(EngineTreeNode::class.java) { true }.firstOrNull()
-        if (selectedNode == null) {
-            return
-        }
+        val selectedNode = tree.getSelectedNode() ?: return
 
         val connection = selectedNode.getConnection() ?: return
 
