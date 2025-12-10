@@ -9,6 +9,7 @@ import com.intellij.util.messages.MessageBus
 import com.vk.enginegrip.bus.EngineBusTopics
 import com.vk.enginegrip.editor.EngineEditorConstant
 import com.vk.enginegrip.enigne.EngineActorConnection
+import com.vk.enginegrip.exceptions.HttpAccessException
 import com.vk.enginegrip.http.EngineJRPClient
 import com.vk.enginegrip.http.WildcardPaginationParams
 import com.vk.enginegrip.notifications.EngineErrorNotification
@@ -84,12 +85,16 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
         private fun <T> safeRequest(request: () -> T): T? {
             return try {
                 request()
-            } catch (ex: ConnectException) {
-                val message = ex.message ?: "Ошибка во время выполнения запроса: ${ex.toString()}"
-                EngineErrorNotification(message).show(project)
-                null
             } catch (ex: Exception) {
-                throw ex
+                when (ex) {
+                    is ConnectException, is HttpAccessException -> {
+                        val message = ex.message ?: "Ошибка во время выполнения запроса: ${ex.toString()}"
+                        EngineErrorNotification(message).show(project)
+                        null
+                    }
+
+                    else -> throw ex
+                }
             }
         }
 

@@ -1,7 +1,9 @@
 package com.vk.enginegrip.http
 
 import com.intellij.execution.process.ProcessIOExecutorService
+import com.intellij.openapi.util.text.StringUtil
 import com.vk.enginegrip.enigne.EngineActorConnection
+import com.vk.enginegrip.exceptions.HttpAccessException
 import io.ktor.util.decodeBase64String
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -124,9 +126,13 @@ class EngineJRPClient(private val connection: EngineActorConnection) {
 
         val httpClient = createHttpClient()
         val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-        if (httpResponse.statusCode() != HttpURLConnection.HTTP_OK) {
-            println("statusCode: ${httpResponse.statusCode()}")
-            throw Error("брат, что-то пошло не так") // TODO
+
+        httpResponse.statusCode().let { code ->
+            if (code != HttpURLConnection.HTTP_OK) {
+                val response = StringUtil.unescapeXmlEntities(StringUtil.stripHtml(httpResponse.body(), ""))
+                println("statusCode: $code body: $response")
+                throw HttpAccessException(response)
+            }
         }
 
         var responseBody = httpResponse.body()

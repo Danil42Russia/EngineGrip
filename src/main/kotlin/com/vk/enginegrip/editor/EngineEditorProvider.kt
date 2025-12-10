@@ -13,6 +13,8 @@ class EngineEditorProvider : WeighedFileEditorProvider() {
     companion object {
         val ENGINE_KEY: Key<String> = Key("ENGINE_KEY")
         val ENGINE_CONNECTION: Key<EngineActorConnection> = Key("ENGINE_CONNECTION")
+
+        val EDITOR_TYPE_ID = "engine-editor"
     }
 
     override fun accept(
@@ -29,7 +31,7 @@ class EngineEditorProvider : WeighedFileEditorProvider() {
         return EngineTableFileEditor(project, file)
     }
 
-    override fun getEditorTypeId(): String = "engine-editor"
+    override fun getEditorTypeId(): String = EDITOR_TYPE_ID
 
     override fun getPolicy(): FileEditorPolicy = FileEditorPolicy.HIDE_DEFAULT_EDITOR
 }

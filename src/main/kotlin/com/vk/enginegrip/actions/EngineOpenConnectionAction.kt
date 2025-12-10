@@ -26,6 +26,26 @@ class EngineOpenConnectionAction(private val tree: Tree) : AnAction() {
             connection
         )
 
-        FileEditorManager.getInstance(e.project!!).openFile(tempFile, true)
+        val fileEditor = FileEditorManager.getInstance(e.project!!)
+
+        val openEngineEditors = fileEditor.allEditors.filter {
+            val virtualFile = it.file
+            virtualFile.fileType is EngineFileType && virtualFile.name == selectedNode.name
+        }
+
+        when (openEngineEditors.size) {
+            0 -> fileEditor.openFile(tempFile, true)
+            1 -> {
+                // на самом деле это ошибка кода, надо избьавиться от LightVirtualFile,
+                // тогда можно делать просто openFile и IDE сама поменяет фокус
+                val openEngineEditor = openEngineEditors.first()
+                fileEditor.openFile(openEngineEditor.file, true)
+            }
+
+            else -> {
+                // хз как такое может получиться... но на всякий откроем
+                fileEditor.openFile(tempFile, true)
+            }
+        }
     }
 }
