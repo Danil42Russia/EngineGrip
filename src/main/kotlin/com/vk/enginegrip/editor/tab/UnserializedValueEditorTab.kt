@@ -4,7 +4,7 @@ import com.intellij.database.datagrid.DataGrid
 import com.intellij.database.run.ui.*
 import com.intellij.openapi.util.Disposer
 
-class PhpSerializedValueEditorTab : ValueEditorTab {
+class UnserializedValueEditorTab : ValueEditorTab {
     override val priority: Int = 50
 
     override fun createTabInfoProvider(
@@ -18,7 +18,7 @@ class PhpSerializedValueEditorTab : ValueEditorTab {
         "Unserialized",
         null
     ) {
-        private var viewer: CellViewer = PhpSerializedCellViewerFactory.createViewer(grid)
+        private var viewer: CellViewer = UnserializedCellViewerFactory.createViewer(grid)
 
         init {
             updateTabInfo()

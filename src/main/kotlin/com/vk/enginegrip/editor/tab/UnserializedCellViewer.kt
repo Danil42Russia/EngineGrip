@@ -22,7 +22,7 @@ import com.intellij.testFramework.LightVirtualFile
 import io.github.haradakunihiko.php_json_deserializer.PhpToJson
 import javax.swing.JComponent
 
-class PhpSerializedCellViewer(private val project: Project, private val grid: DataGrid) : CellViewer {
+class UnserializedCellViewer(private val project: Project, private val grid: DataGrid) : CellViewer {
     private val editor: EditorEx = createEditor()
 
     private val wrappedComponent = UiDataProvider.wrapComponent(editor.component) { sink ->

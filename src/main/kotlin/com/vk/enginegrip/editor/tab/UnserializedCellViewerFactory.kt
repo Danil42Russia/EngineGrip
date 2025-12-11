@@ -8,12 +8,12 @@ import com.intellij.database.run.ui.CellViewer
 import com.intellij.database.run.ui.CellViewerFactory
 import com.intellij.database.run.ui.Suitability
 
-object PhpSerializedCellViewerFactory : CellViewerFactory {
+object UnserializedCellViewerFactory : CellViewerFactory {
     override fun getSuitability(grid: DataGrid, row: ModelIndex<GridRow>, column: ModelIndex<GridColumn>): Suitability {
         return Suitability.MAX
     }
 
     override fun createViewer(grid: DataGrid): CellViewer {
-        return PhpSerializedCellViewer(grid.project, grid)
+        return UnserializedCellViewer(grid.project, grid)
     }
 }

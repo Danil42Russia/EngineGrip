@@ -31,7 +31,7 @@
         <!--        <fileEditorProvider />-->
         <!--        <selectInTarget />-->
 
-        <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.PhpSerializedValueEditorTab"/>
+        <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.UnserializedValueEditorTab"/>
         <!-- Ломает текущую IDE. Отключил нафиг -->
         <!--        <database.datagrid.extractorsHelper implementation="com.vk.enginegrip.extractors.EngineExtractorsHelper" />-->
 
