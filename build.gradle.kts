@@ -125,4 +125,8 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
+
+    buildPlugin {
+        archiveBaseName.set("enginegrip")
+    }
 }
