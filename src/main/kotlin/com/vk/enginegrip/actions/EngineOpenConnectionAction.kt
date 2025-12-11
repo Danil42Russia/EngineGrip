@@ -36,7 +36,7 @@ class EngineOpenConnectionAction(private val tree: Tree) : AnAction() {
         when (openEngineEditors.size) {
             0 -> fileEditor.openFile(tempFile, true)
             1 -> {
-                // на самом деле это ошибка кода, надо избьавиться от LightVirtualFile,
+                // на самом деле это ошибка кода, надо избавиться от LightVirtualFile,
                 // тогда можно делать просто openFile и IDE сама поменяет фокус
                 val openEngineEditor = openEngineEditors.first()
                 fileEditor.openFile(openEngineEditor.file, true)

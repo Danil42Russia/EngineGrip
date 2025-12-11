@@ -51,7 +51,7 @@ class EngineToolWindowController(private val project: Project) : Disposable {
         val group = DefaultActionGroup()
 
         group.add(EngineNewActorAction())
-        group.add(EngineEditActorAction())
+//        group.add(EngineEditActorAction())
         group.add(EngineDeleteActorAction(tree))
 
         val toolbar = ActionManager.getInstance()

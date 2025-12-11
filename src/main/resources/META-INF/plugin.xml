@@ -32,7 +32,8 @@
         <!--        <selectInTarget />-->
 
         <database.datagrid.valueEditorTab implementation="com.vk.enginegrip.editor.tab.PhpSerializedValueEditorTab"/>
-        <database.datagrid.extractorsHelper implementation="com.vk.enginegrip.extractors.EngineExtractorsHelper" />
+        <!-- Ломает текущую IDE. Отключил нафиг -->
+        <!--        <database.datagrid.extractorsHelper implementation="com.vk.enginegrip.extractors.EngineExtractorsHelper" />-->
 
         <notificationGroup id="Engine Notification" displayType="BALLOON"/>
     </extensions>

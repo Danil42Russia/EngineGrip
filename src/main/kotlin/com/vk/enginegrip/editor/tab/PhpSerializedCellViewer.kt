@@ -90,6 +90,8 @@ class PhpSerializedCellViewer(private val project: Project, private val grid: Da
 
         val document = editor.document
         runWriteAction {
+            // TODO: вот тут надо подумать как обмануть форматтер. Сейчас он думает, что тут HEX
+            // но при этом если сделать форматирование руками, то всё заработает. ХЗ почему
             val formatter = GridCellEditorFactoryProvider.get(grid)
                 ?.getEditorFactory(grid, rowIdx, columnIdx)
                 ?.getValueFormatter(grid, rowIdx, columnIdx, normalizeValue)
@@ -100,7 +102,6 @@ class PhpSerializedCellViewer(private val project: Project, private val grid: Da
             file?.charset = result.charset
             file?.bom = result.bom
 
-            println("!!! ${result.text}")
             document.setText(result.text)
         }
     }
@@ -119,7 +120,7 @@ class PhpSerializedCellViewer(private val project: Project, private val grid: Da
         return try {
             PhpToJson.convert(value, prettyPrint = true)
         } catch (_: Exception) {
-            ""
+            value
         }
     }
 }

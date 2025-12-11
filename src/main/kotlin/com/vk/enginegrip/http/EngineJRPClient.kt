@@ -90,9 +90,16 @@ data class WildcardCountResponse(val count: Int)
 
 class EngineJRPClient(private val connection: EngineActorConnection) {
     val defaultTimeout: Duration = Duration.ofSeconds(10)
-    val baseUrl: String = connection.url + ":" + connection.port
+    val baseUrl: String
 
     init {
+        var tmpUrl = connection.url
+        if (connection.port != 0) {
+            tmpUrl += ":" + connection.port
+        }
+
+        baseUrl = tmpUrl
+
         println("JRP host: $baseUrl | actor: ${connection.actor}")
     }
 

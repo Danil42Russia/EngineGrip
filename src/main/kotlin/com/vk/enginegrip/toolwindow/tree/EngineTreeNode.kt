@@ -11,12 +11,8 @@ class EngineTreeNode(
     private val children: MutableList<EngineTreeNode> = mutableListOf(),
     private val connection: EngineActorConnection? = null
 ) : SimpleNode(project) {
-    init {
-//        presentation.setIcon(AllIcons.Gutter.WriteAccess)
 
-    }
-
-    override fun getName() = name
+    override fun getName(): String = name
 
     override fun getChildren(): Array<EngineTreeNode> = children.toTypedArray()
 
@@ -35,5 +31,6 @@ class EngineTreeNode(
         }
     }
 
+    // null может быть только у root. После разделение null должен пропасть
     fun getConnection(): EngineActorConnection? = connection
 }

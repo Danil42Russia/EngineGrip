@@ -15,7 +15,7 @@ class EngineDeleteActorAction(private val tree: Tree) :
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project!!
 
-        val selectedNode = tree.getSelectedNode()!!
+        val selectedNode = tree.getSelectedNode() ?: return
         val connection = selectedNode.getConnection()!!
 
         val actor = EngineActor(

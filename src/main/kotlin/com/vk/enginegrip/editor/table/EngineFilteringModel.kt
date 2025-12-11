@@ -8,7 +8,8 @@ import com.intellij.util.EventDispatcher
 
 class EngineFilteringModel : GridFilteringModel {
     private val myEventDispatcher = EventDispatcher.create(GridFilteringModel.Listener::class.java)
-    private val myDocument = EditorFactory.getInstance().createDocument("")
+    private val myDocument: Document = EditorFactory.getInstance().createDocument("")
+    private val myHistory: MutableList<String?> = mutableListOf()
 
     override fun getFilterText(): String {
         return myDocument.text
@@ -31,11 +32,12 @@ class EngineFilteringModel : GridFilteringModel {
     }
 
     override fun setHistory(history: List<String?>) {
-        TODO("setHistory")
+        myHistory.clear()
+        myHistory.addAll(history)
     }
 
     override fun getHistory(): List<String?> {
-        TODO("getHistory")
+        return myHistory
     }
 
     override fun getFilterDocument(): Document = myDocument

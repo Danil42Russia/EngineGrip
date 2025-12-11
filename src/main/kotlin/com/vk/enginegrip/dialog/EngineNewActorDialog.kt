@@ -17,7 +17,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         private set
     var jrpHost: String = ""
         private set
-    var jrpPort: Int = 8080
+    var jrpPort: Int = 8100
         private set
 
     init {
@@ -93,7 +93,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
 
     private fun normalizeHost(url: String): String {
         var tmp = url
-        if (!url.startsWith("http://") || !url.startsWith("https://")) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
             tmp = "https://$tmp"
         }
 

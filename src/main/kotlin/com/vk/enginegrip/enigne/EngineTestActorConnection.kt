@@ -16,5 +16,5 @@ class EngineTestActorConnection : BaseState() {
     var url: String? by string()
 
     @get:Tag("port")
-    var port: Int by property(defaultValue = 8080)
+    var port: Int by property(defaultValue = 0)
 }

@@ -15,7 +15,7 @@ class PhpSerializedValueEditorTab : ValueEditorTab {
     }
 
     private class RecordViewInfoProvider(private val grid: DataGrid, openValueEditorTab: () -> Unit) : TabInfoProvider(
-        "Php Serialized",
+        "Unserialized",
         null
     ) {
         private var viewer: CellViewer = PhpSerializedCellViewerFactory.createViewer(grid)

@@ -87,7 +87,8 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
                 request()
             } catch (ex: Exception) {
                 when (ex) {
-                    is ConnectException, is HttpAccessException -> {
+                    is ConnectException,
+                    is HttpAccessException -> {
                         val message = ex.message ?: "Ошибка во время выполнения запроса: ${ex.toString()}"
                         EngineErrorNotification(message).show(project)
                         null
@@ -132,7 +133,7 @@ class EngineGridDataHookUp(project: Project, val messageBus: MessageBus, val con
             myRowsLoaded = 0
             pageStarkRowsLoaded = 0
 
-            if (!isMock) {
+            if (isMock) {
                 load(source, 0)
             } else {
                 // Если мы не смогли получить количество элементов, то нет смысла делать запрос на получения элементов
