@@ -15,46 +15,29 @@ import org.jetbrains.annotations.ApiStatus.Internal
         )
     ]
 )
-class EngineConnectionDataStorage : PersistentStateComponent<EngineConnectionState> {
-    private var state = EngineConnectionState()
+class EngineConnectionDataStorage : PersistentStateComponent<EngineConnectionsState> {
+    private var state = EngineConnectionsState()
 
     @Internal
-    override fun getState(): EngineConnectionState = state
+    override fun getState(): EngineConnectionsState = state
 
     @Internal
-    override fun loadState(state: EngineConnectionState) {
+    override fun loadState(state: EngineConnectionsState) {
         XmlSerializerUtil.copyBean(state, this.state)
     }
 
     fun getActors(): List<EngineActor> {
-        return state.connections.map {
-            EngineActor(
-                name = (it.name ?: ""),
-                connection = EngineActorConnection(
-                    url = (it.url ?: ""),
-                    port = it.port,
-                    actor = it.actorID
-                ),
-            )
-        }
+        return state.connections.map { it.fromState() }
     }
 
     fun addInnerActor(actor: EngineActor) {
-        val inner = EngineTestActorConnection().also {
-            it.name = actor.name
-            it.actorID = actor.connection.actor
-            it.url = actor.connection.url
-        }
+        val inner = actor.toState()
 
         state.connections.add(inner)
     }
 
     fun removeInnerActor(actor: EngineActor) {
-        val inner = EngineTestActorConnection().also {
-            it.name = actor.name
-            it.actorID = actor.connection.actor
-            it.url = actor.connection.url
-        }
+        val inner = actor.toState()
 
         if (state.connections.contains(inner)) {
             state.connections.remove(inner)
@@ -62,6 +45,26 @@ class EngineConnectionDataStorage : PersistentStateComponent<EngineConnectionSta
             // TODO: logger
             println("!!! ошибка в логике удаления элемента из стейта: $actor")
         }
+    }
+
+    fun EngineActor.toState(): EngineConnectionState {
+        return EngineConnectionState().also {
+            it.name = name
+            it.actorID = connection.actor
+            it.url = connection.url
+            it.port = connection.port
+        }
+    }
+
+    fun EngineConnectionState.fromState(): EngineActor {
+        return EngineActor(
+            name = (name ?: ""),
+            connection = EngineActorConnection(
+                url = (url ?: ""),
+                port = port,
+                actor = actorID
+            ),
+        )
     }
 
     companion object {
