@@ -17,17 +17,11 @@ class EngineEditorProvider : WeighedFileEditorProvider() {
         val EDITOR_TYPE_ID = "engine-editor"
     }
 
-    override fun accept(
-        project: Project,
-        file: VirtualFile
-    ): Boolean {
+    override fun accept(project: Project, file: VirtualFile): Boolean {
         return file.getUserData(ENGINE_KEY) != null
     }
 
-    override fun createEditor(
-        project: Project,
-        file: VirtualFile
-    ): FileEditor {
+    override fun createEditor(project: Project, file: VirtualFile): FileEditor {
         return EngineTableFileEditor(project, file)
     }
 

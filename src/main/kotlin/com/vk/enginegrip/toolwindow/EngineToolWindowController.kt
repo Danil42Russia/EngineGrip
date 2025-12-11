@@ -13,9 +13,9 @@ import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.tree.TreeUtil
 import com.vk.enginegrip.actions.EngineDeleteActorAction
-import com.vk.enginegrip.actions.EngineEditActorAction
 import com.vk.enginegrip.actions.EngineNewActorAction
 import com.vk.enginegrip.actions.EngineOpenConnectionAction
+import com.vk.enginegrip.actions.EngineToolWindowRefreshAction
 import com.vk.enginegrip.bus.EngineActorTopics
 import com.vk.enginegrip.enigne.EngineActor
 import com.vk.enginegrip.toolwindow.tree.EngineTreeStructureProvider
@@ -53,6 +53,7 @@ class EngineToolWindowController(private val project: Project) : Disposable {
         group.add(EngineNewActorAction())
 //        group.add(EngineEditActorAction())
         group.add(EngineDeleteActorAction(tree))
+        group.add(EngineToolWindowRefreshAction(tree, asyncTreeModel))
 
         val toolbar = ActionManager.getInstance()
             .createActionToolbar("EngineToolWindowToolbar", group, true)

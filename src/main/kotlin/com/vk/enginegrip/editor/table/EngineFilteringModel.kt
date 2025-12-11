@@ -42,10 +42,7 @@ class EngineFilteringModel : GridFilteringModel {
 
     override fun getFilterDocument(): Document = myDocument
 
-    override fun addListener(
-        l: GridFilteringModel.Listener,
-        disposable: Disposable
-    ) {
+    override fun addListener(l: GridFilteringModel.Listener, disposable: Disposable) {
         myEventDispatcher.addListener(l, disposable)
     }
 
