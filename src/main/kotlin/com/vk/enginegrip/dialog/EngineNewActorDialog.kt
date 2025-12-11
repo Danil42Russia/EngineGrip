@@ -78,7 +78,7 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         val inner = EngineActor(
             name = name,
             connection = EngineActorConnection(
-                url = normalizeHost(jrpHost),
+                url = normalizeUrl(jrpHost),
                 port = jrpPort,
                 actor = actorID,
             ),
@@ -91,13 +91,19 @@ class EngineNewActorDialog(private val project: Project) : DialogWrapper(project
         super.doOKAction()
     }
 
-    private fun normalizeHost(url: String): String {
-        var tmp = url
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            tmp = "https://$tmp"
+    private fun normalizeUrl(url: String): String {
+        var newUrl = url
+        // специальный хак, что-бы не заставлять явно писать протокол
+        // TODO: мб добавить проверку на ip адрес
+        if (url.startsWith("localhost") || url.startsWith("127.0.0.1")) {
+            newUrl = "http://$newUrl"
         }
 
-        return tmp.removeSuffix("/")
+        if (!newUrl.startsWith("http://") && !newUrl.startsWith("https://")) {
+            newUrl = "https://$newUrl"
+        }
+
+        return newUrl.removeSuffix("/")
     }
 
     private fun <T : JTextField> Cell<T>.required(): Cell<T> = this
